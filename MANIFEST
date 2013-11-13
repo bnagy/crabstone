@@ -1,0 +1,15 @@
+* CHANGES
+* MANIFEST
+* Rakefile
+* README
+
+* lib/arch/arm.rb
+* lib/arch/arm64.rb
+* lib/arch/x86.rb
+* lib/crabstone.rb
+
+* test/test.rb
+* test/test_arm.rb
+* test/test_arm64.rb
+* test/test_detail.rb
+* test/test_x86.rb
