@@ -32,21 +32,12 @@ module Crabstone
     end
 
     class Operand < FFI::Struct
+
       layout(
         :shift, OperandShift,
         :ext, :uint,
         :type, :uint,
         :value, OperandValue
-      )
-    end
-
-    class Instruction < FFI::Struct
-      layout(
-        :cc, :uint,
-        :writeback, :bool,
-        :update_flags, :bool,
-        :op_count, :uint8,
-        :operands, [Operand, 32]
       )
 
       def value
@@ -62,6 +53,22 @@ module Crabstone
         else
           nil
         end
+      end
+
+      def shift_type
+        self[:shift][:type]
+      end
+
+      def shift_value
+        self[:shift][:value]
+      end
+
+      def shift?
+        self[:shift][:type] != SFT_INVALID
+      end
+
+      def ext?
+        self[:ext] != EXT_INVALID
       end
 
       def reg?
@@ -87,7 +94,17 @@ module Crabstone
       def valid?
         [OP_MEM, OP_IMM, OP_CIMM, OP_FP, OP_REG].include? self[:type]
       end
-      
+
+    end
+
+    class Instruction < FFI::Struct
+      layout(
+        :cc, :uint,
+        :writeback, :bool,
+        :update_flags, :bool,
+        :op_count, :uint8,
+        :operands, [Operand, 32]
+      )
     end
 
     # ARM64 operand shift type

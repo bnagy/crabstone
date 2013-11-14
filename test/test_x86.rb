@@ -75,7 +75,7 @@ def print_detail(cs, i, mode, stringio)
       )
     end
   end
-  
+
   if (count=i.op_count(OP_IMM)).nonzero?
     stringio.puts "\timm_count: #{count}"
     i.operands.select(&:imm?).each_with_index {|op,j|
@@ -130,7 +130,7 @@ ours = StringIO.new
     cache = i
   end
 
-  ours.printf("0x%x:\n", cache.address + cache.size);
+  ours.printf("0x%x:\n", cache.address + cache.size)
   ours.puts
 end
 

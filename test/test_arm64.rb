@@ -4,6 +4,7 @@
 # By Tan Sheng Di & Nguyen Anh Quynh, 2013
 
 require 'crabstone'
+require 'stringio'
 
 CODE = "\x21\x7c\x02\x9b\x21\x7c\x00\x53\x00\x40\x21\x4b\xe1\x0b\x40\xb9\x20\x04\x81\xda\x20\x08\x02\x8b"
 
@@ -19,66 +20,89 @@ include Crabstone::ARM64
   ]
 ]
 
-def non_neg(value)
-  value = value & 0xffffffff
-  return value.to_s(16)
+def uint32 i
+  Integer(i) & 0xffffffff
 end
 
-def print_detail(cs, i)
-  if not [CC_AL, CC_INVALID].include? i.cc
-    puts "\tCode condition: #{i.cc}"
+def uint64 i
+  Integer(i) & 0xffffffffffffffff
+end
+
+def print_detail(cs, insn, sio)
+
+
+  if insn.update_flags
+    sio.puts "\tUpdate-flags: True"
   end
 
-  if i.update_flags
-    puts "\tUpdate-flags: True"
+  if insn.writeback
+    sio.puts "\tWriteback: True"
   end
 
-  if i.writeback
-    puts "\tWriteback: True"
-  end
-
-  if i.op_count > 0
-    puts "\top_count: #{i.op_count}"
-    i.operands.each_with_index do |op,idx|
+  if insn.op_count > 0
+    sio.puts "\top_count: #{insn.op_count}"
+    insn.operands.each_with_index do |op,idx|
       case op[:type]
       when OP_REG
-        puts "\t\toperands[#{idx}].type: REG = #{i.reg_name(op[:value][:reg])}"
+        sio.puts "\t\toperands[#{idx}].type: REG = #{insn.reg_name(op.value)}"
       when OP_IMM
-        puts "\t\toperands[#{idx}].type: IMM = 0x#{non_neg(op[:value][:imm])}"
+        sio.puts "\t\toperands[#{idx}].type: IMM = 0x#{uint32(op.value)}"
       when OP_FP
-        puts "\t\toperands[#{idx}].type: FP = 0x#{non_neg(op[:value][:fp])}"
+        sio.puts "\t\toperands[#{idx}].type: FP = 0x#{uint32(op.value)}"
       when OP_CIMM
-        puts "\t\toperands[#{idx}].type: C-IMM = 0x#{non_neg(op[:value][:imm])}"
+        sio.puts "\t\toperands[#{idx}].type: C-IMM = 0x#{uint32(op.value)}"
       when OP_MEM
-        puts "\t\toperands[#{idx}].type: MEM"
-        if op[:value][:mem][:base].nonzero?
-          puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % i.reg_name(op[:value][:mem][:base])
+        sio.puts "\t\toperands[#{idx}].type: MEM"
+        if op.value[:base].nonzero?
+          sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % insn.reg_name(op.value[:base])
         end
-        if op[:value][:mem][:index].nonzero?
-          puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % i.reg_name(op[:value][:mem][:index])
+        if op.value[:index].nonzero?
+          sio.puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % insn.reg_name(op.value[:index])
         end
-        if op[:value][:mem][:disp].nonzero?
-          puts "\t\t\toperands[#{idx}].mem.disp = %s" % non_neg(op[:value][:mem][:disp])
+        if op.value[:disp].nonzero?
+          sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x%x" % (uint32(op.value[:disp]))
         end
       end
-      if op[:shift][:type] != SFT_INVALID && op[:shift][:value]
-        puts "\t\t\tShift: type = #{op[:shift][:type]}, value = #{op[:shift][:value]}"
+      if op.shift?
+        sio.puts "\t\t\tShift: type = #{op.shift_type}, value = #{op.shift_value}"
       end
-      if op[:ext] != EXT_INVALID
-        puts "\t\t\tExt: #{op[:ext]}"
+      if op.ext?
+        sio.puts "\t\t\tExt: #{op[:ext]}"
       end
     end
   end
-  puts
+  if not [CC_AL, CC_INVALID].include? insn.cc
+    sio.printf("\tCode condition: %u\n", insn.cc)
+  end
+  sio.puts
 end
+
+ours = StringIO.new
 
 #Test through all modes and architectures
 @platforms.each do |p|
-  puts "**********"
-  puts "Platforms: #{p['comment']}"
-  cs = Disassembler.new(p['arch'], p['mode'])
-  cs.disasm(p['code'], 0x1000).each do |i|
-    puts "0x#{i.address.to_s(16)}: #{i.mnemonic}\t#{i.operand_string}"
-    print_detail(cs, i)
+  ours.puts "****************"
+  ours.puts "Platform: #{p['comment']}"
+  ours.puts "Code:#{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
+  ours.puts "Disasm:"
+
+  cs    = Disassembler.new(p['arch'], p['mode'])
+  res   = cs.disasm(p['code'], 0x2c)
+  cache = nil
+  res.each do |i|
+    ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.operand_string}"
+    print_detail(cs, i, ours)
+    cache = i
   end
+
+  ours.printf("0x%x:\n", cache.address + cache.size)
+  ours.puts
+end
+
+ours.rewind
+theirs = File.binread(__FILE__ + ".SPEC")
+if ours.read == theirs
+  puts "#{__FILE__}: PASS"
+else
+  puts "#{__FILE__}: FAIL"
 end
