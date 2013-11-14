@@ -75,6 +75,7 @@ def print_detail(cs, i, mode, stringio)
       )
     end
   end
+  
   if (count=i.op_count(OP_IMM)).nonzero?
     stringio.puts "\timm_count: #{count}"
     i.operands.select(&:imm?).each_with_index {|op,j|

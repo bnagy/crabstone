@@ -48,6 +48,46 @@ module Crabstone
         :op_count, :uint8,
         :operands, [Operand, 32]
       )
+
+      def value
+        case self[:type]
+        when OP_REG
+          self[:value][:reg]
+        when OP_IMM
+          self[:value][:imm]
+        when OP_MEM
+          self[:value][:mem]
+        when OP_FP
+          self[:value][:fp]
+        else
+          nil
+        end
+      end
+
+      def reg?
+        self[:type] == OP_REG
+      end
+
+      def imm?
+        self[:type] == OP_IMM
+      end
+
+      def cimm?
+        self[:type] == OP_CIMM
+      end
+
+      def mem?
+        self[:type] == OP_MEM
+      end
+
+      def fp?
+        self[:type] == OP_FP
+      end
+
+      def valid?
+        [OP_MEM, OP_IMM, OP_CIMM, OP_FP, OP_REG].include? self[:type]
+      end
+      
     end
 
     # ARM64 operand shift type

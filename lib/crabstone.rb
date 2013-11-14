@@ -6,7 +6,9 @@ require 'ffi'
 require_relative 'arch/x86'
 require_relative 'arch/x86_registers'
 require_relative 'arch/arm'
+require_relative 'arch/arm_registers'
 require_relative 'arch/arm64'
+require_relative 'arch/arm64_registers'
 
 module Crabstone
 
