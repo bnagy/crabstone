@@ -4,6 +4,7 @@
 require 'ffi'
 
 require_relative 'arch/x86'
+require_relative 'arch/x86_registers'
 require_relative 'arch/arm'
 require_relative 'arch/arm64'
 
@@ -69,40 +70,15 @@ module Crabstone
 
   class Instruction
 
-    attr_reader :id, :address, :size, :mnemonic, :operand_string, :regs_read,
-      :regs_write, :groups, :cc, :update_flags, :writeback, :prefix,
-      :segment, :opcode, :op_size, :addr_size, :disp_size, :imm_size,
-      :modrm, :sib, :disp, :sib_index, :sib_scale, :operands, :raw_insn, :csh
+    attr_reader :arch, :csh, :groups, :raw_insn, :regs_read, :regs_write
 
     def initialize csh, insn, arch
-      @id             = insn[:id]
-      @address        = insn[:address]
-      @size           = insn[:size]
-      @mnemonic       = insn[:mnemonic]
-      @operand_string = insn[:operand_string]
+      @arch           = arch
+      @csh            = csh
       @groups         = insn[:groups].take_while( &:nonzero? )
+      @raw_insn       = insn
       @regs_read      = insn[:regs_read].take_while( &:nonzero? )
       @regs_write     = insn[:regs_write].take_while( &:nonzero? )
-
-
-      case arch
-      when ARCH_ARM
-        Crabstone::ARM::Instruction.members.each {|m|
-          instance_variable_set "@#{m}", insn[:arch][:arm][m]
-        }
-      when ARCH_ARM64
-        Crabstone::ARM64::Instruction.members.each {|m|
-          instance_variable_set "@#{m}", insn[:arch][:arm64][m]
-        }
-      when ARCH_X86
-        Crabstone::X86::Instruction.members.each {|m|
-          instance_variable_set "@#{m}", insn[:arch][:x86][m]
-        }
-      end
-
-      # save original insn for later use
-      @raw_insn = insn
-      @csh      = csh
     end
 
     def reg_name regid
@@ -135,6 +111,25 @@ module Crabstone
 
     def op_index op_type, position
       Binding.cs_op_index csh, raw_insn, op_type, position
+    end
+
+    def method_missing meth, *args
+      if raw_insn.members.include? meth
+        # Dispatch to toplevel Instruction class ( this file )
+        raw_insn[meth]
+      else
+        # Dispatch to the architecture specific Instruction ( in arch/ )
+        case arch
+        when ARCH_ARM
+          raw_insn[:arch][:arm][meth]
+        when ARCH_ARM64
+          raw_insn[:arch][:arm64][meth]
+        when ARCH_X86
+          raw_insn[:arch][:x86][meth]
+        else
+          raise NoMethodError, "Unknown method #{meth} for #{self.class}"
+        end
+      end
     end
   end
 
