@@ -3,7 +3,7 @@
 # Library by Ngyuen Anh Quynh
 # Original binding by Nguyen Anh Quynh and Tan Sheng Di
 # Additional binding work by Ben Nagy
-# © 2013 COSEINC
+# (c) 2013 COSEINC
 
 require 'crabstone'
 require 'stringio'
