@@ -2,9 +2,9 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'crabstone'
-  spec.version    = '0.0.1'
+  spec.version    = '0.0.2'
   spec.author     = 'Ben Nagy'
-  spec.license    = 'MIT'
+  spec.license    = 'BSD'
   spec.email      = 'ben@iagu.net'
   spec.homepage   = 'https://github.com/bnagy/crabstone'
   spec.summary    = 'Ruby FFI bindings for the capstone disassembly engine'

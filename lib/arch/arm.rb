@@ -1,5 +1,7 @@
-# Ruby bindings for Crabstone.
-# By Tan Sheng Di & Nguyen Anh Quynh, 2013
+# Library by Ngyuen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# © 2013 COSEINC
 
 require 'ffi'
 
@@ -36,16 +38,6 @@ module Crabstone
         :shift, OperandShift,
         :type, :uint,
         :value, OperandValue
-      )
-    end
-
-    class Instruction < FFI::Struct
-      layout(
-        :cc, :uint,
-        :writeback, :bool,
-        :update_flags, :bool,
-        :op_count, :uint8,
-        :operands, [Operand, 32]
       )
 
       def value
@@ -89,6 +81,20 @@ module Crabstone
 
       def valid?
         [OP_MEM, OP_IMM, OP_CIMM, OP_PIMM, OP_FP, OP_REG].include? self[:type]
+      end
+    end
+
+    class Instruction < FFI::Struct
+      layout(
+        :cc, :uint,
+        :writeback, :bool,
+        :update_flags, :bool,
+        :op_count, :uint8,
+        :operands, [Operand, 32]
+      )
+
+      def operands
+        self[:operands].take_while {|op| op[:type].nonzero?}
       end
 
     end

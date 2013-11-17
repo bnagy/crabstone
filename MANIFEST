@@ -1,15 +1,25 @@
 * CHANGES
 * MANIFEST
+* LICENSE
 * Rakefile
 * README
 
 * lib/arch/arm.rb
+* lib/arch/arm_registers.rb
 * lib/arch/arm64.rb
+* lib/arch/arm64_registers.rb
 * lib/arch/x86.rb
+* lib/arch/x86_registers.rb
+
 * lib/crabstone.rb
 
 * test/test.rb
+* test/test.rb.SPEC
 * test/test_arm.rb
+* test/test_arm.rb.SPEC
 * test/test_arm64.rb
+* test/test_arm64.rb.SPEC
 * test/test_detail.rb
+* test/test_detail.rb.SPEC
 * test/test_x86.rb
+* test/test_x86.rb.SPEC

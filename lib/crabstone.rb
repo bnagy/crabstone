@@ -1,5 +1,7 @@
-# Ruby bindings for Crabstone.
-# By Tan Sheng Di & Nguyen Anh Quynh, 2013
+# Library by Ngyuen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# © 2013 COSEINC
 
 require 'ffi'
 
@@ -12,7 +14,7 @@ require_relative 'arch/arm64_registers'
 
 module Crabstone
 
-  VERSION = '0.0.1'
+  VERSION = '0.0.2'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -39,6 +41,7 @@ module Crabstone
         :x86, X86::Instruction,
         :arm64, ARM64::Instruction,
         :arm, ARM::Instruction
+        #mips
       )
     end
 
@@ -73,14 +76,16 @@ module Crabstone
   class Instruction
 
     attr_reader :arch, :csh, :groups, :raw_insn, :regs_read, :regs_write
+    ARCHS = { arm: ARCH_ARM, arm64: ARCH_ARM64, x86: ARCH_X86, mips: ARCH_MIPS}.invert
 
     def initialize csh, insn, arch
-      @arch           = arch
-      @csh            = csh
-      @groups         = insn[:groups].take_while( &:nonzero? )
-      @raw_insn       = insn
-      @regs_read      = insn[:regs_read].take_while( &:nonzero? )
-      @regs_write     = insn[:regs_write].take_while( &:nonzero? )
+      @arch       = arch
+      @csh        = csh
+      @groups     = insn[:groups].take_while( &:nonzero? )
+      @raw_insn   = insn
+      @regs_read  = insn[:regs_read].take_while( &:nonzero? )
+      @regs_write = insn[:regs_write].take_while( &:nonzero? )
+      @arch_insn  = raw_insn[:arch][ARCHS[arch]]
     end
 
     def reg_name regid
@@ -91,15 +96,22 @@ module Crabstone
       Binding.cs_insn_name(csh, id).read_string
     end
 
-    def group? group_id
-      Binding.cs_insn_group csh, raw_insn, group_id
+    def group? groupid
+      Binding.cs_insn_group csh, raw_insn, groupid
     end
 
     def reads? regid
+      # If they gave us a register as a string...
+      if regid.respond_to?( &:upcase )
+        regid = ARCHS[arch].register regid.upcase
+      end
       Binding.cs_reg_read csh, raw_insn, regid
     end
 
     def writes? regid
+      if regid.respond_to?( &:upcase )
+        regid = ARCHS[arch].register regid.upcase
+      end
       Binding.cs_reg_write csh, raw_insn, regid
     end
 
@@ -107,7 +119,7 @@ module Crabstone
       if op_type
         Binding.cs_op_count csh, raw_insn, op_type
       else
-        operands.select {|op| op[:type].nonzero?}.size
+        self.operands.size
       end
     end
 
@@ -121,13 +133,10 @@ module Crabstone
         raw_insn[meth]
       else
         # Dispatch to the architecture specific Instruction ( in arch/ )
-        case arch
-        when ARCH_ARM
-          raw_insn[:arch][:arm][meth]
-        when ARCH_ARM64
-          raw_insn[:arch][:arm64][meth]
-        when ARCH_X86
-          raw_insn[:arch][:x86][meth]
+        if @arch_insn.respond_to? meth
+          @arch_insn.send meth, *args
+        elsif @arch_insn.members.include? meth
+          @arch_insn[meth]
         else
           raise NoMethodError, "Unknown method #{meth} for #{self.class}"
         end
@@ -167,6 +176,7 @@ module Crabstone
           count,
           insn_ptr
         )
+
         (0...insn_count * insn.size).step(insn.size).each {|off|
           cs_insn   = Binding::Instruction.new( insn_ptr.read_pointer+off ).clone
           this_insn = Instruction.new cs_hptr.read_ulong_long, cs_insn, arch

@@ -1,1 +1,6 @@
-XYZ blah blah blah
+Crabstone is the Ruby binding for the Capstone disassembly library.
+
+# © 2013 COSEINC
+
+Authors: Ngyuen Anh Quynh, Tan Sheng Di, Ben Nagy ( Ruby binding )
+License: BSD style - details in the LICENSE file

@@ -1,5 +1,7 @@
-# Ruby bindings for Crabstone.
-# By Tan Sheng Di & Nguyen Anh Quynh, 2013
+# Library by Ngyuen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# © 2013 COSEINC
 
 require 'ffi'
 
@@ -77,6 +79,7 @@ module Crabstone
     end
 
     class Instruction < FFI::Struct
+
       layout(
         :prefix, [:uint8, 5],
         :segment, :uint,
@@ -94,6 +97,11 @@ module Crabstone
         :op_count, :uint8,
         :operands, [Operand, 8]
       )
+
+      def operands
+        self[:operands].first self[:op_count]
+      end
+
     end
 
     # all X86 reigsters
