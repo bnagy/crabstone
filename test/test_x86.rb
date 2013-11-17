@@ -142,8 +142,6 @@ module TestX86
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
-    #puts "#{__FILE__}: FAIL"
-    ours.rewind
-    puts ours.read
+    puts "#{__FILE__}: FAIL"
   end
 end
