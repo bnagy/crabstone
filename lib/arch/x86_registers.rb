@@ -235,9 +235,15 @@ module Crabstone
       "R14W"   => 231,
       "R15W"   => 232
     }
+    ID_LOOKUP = REG_LOOKUP.invert
 
-    def self.register str
-      REG_LOOKUP[str.upcase]
+    def self.register reg
+      return reg if ID_LOOKUP[reg]
+      if reg.respond_to? :upcase
+        REG_LOOKUP[reg.upcase] || REG_LOOKUP['INVALID']
+      else
+        REG_LOOKUP['INVALID']
+      end
     end
 
   end

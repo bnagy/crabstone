@@ -62,6 +62,20 @@ module TestARM
       sio.puts "\tWriteback: True"
     end
 
+    if i.reads?( 'sp' ) || i.reads?( 12 ) || i.reads?( REG_SP )
+      print '[sp:r]'
+      unless i.reads?( 'sp' ) && i.reads?( 12 ) && i.reads?( REG_SP )
+        fail "Error in reg read decomposition"
+      end
+    end
+
+    if i.writes?( 'lr' ) || i.writes?( 10 ) || i.writes?( REG_LR )
+      print '[lr:w]'
+      unless i.writes?( 'lr' ) && i.writes?( 10 ) && i.writes?( REG_LR )
+        fail "Error in reg write decomposition"
+      end
+    end
+
     if i.op_count > 0 then
       sio.puts "\top_count: #{i.op_count}"
       c = 0

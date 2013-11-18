@@ -79,6 +79,20 @@ module TestX86
       end
     end
 
+    if i.reads?( 'eax' ) || i.reads?( 19 ) || i.reads?( REG_EAX )
+      print '[eax:r]'
+      unless i.reads?( 'eax' ) && i.reads?( 19 ) && i.reads?( REG_EAX )
+        fail "Error in reg read decomposition"
+      end
+    end
+
+    if i.writes?( 'eax' ) || i.writes?( 19 ) || i.writes?( REG_EAX )
+      print '[eax:w]'
+      unless i.writes?( 'eax' ) && i.writes?( 19 ) && i.writes?( REG_EAX )
+        fail "Error in reg write decomposition"
+      end
+    end
+
     if (count=i.op_count(OP_IMM)).nonzero?
       stringio.puts "\timm_count: #{count}"
       i.operands.select(&:imm?).each_with_index {|op,j|

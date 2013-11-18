@@ -14,7 +14,7 @@ require_relative 'arch/arm64_registers'
 
 module Crabstone
 
-  VERSION = '0.0.3'
+  VERSION = '0.0.2'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -77,6 +77,7 @@ module Crabstone
 
     attr_reader :arch, :csh, :groups, :raw_insn, :regs_read, :regs_write
     ARCHS = { arm: ARCH_ARM, arm64: ARCH_ARM64, x86: ARCH_X86, mips: ARCH_MIPS}.invert
+    ARCH_CLASSES = { ARCH_ARM => ARM, ARCH_ARM64 => ARM64, ARCH_X86 => X86}
 
     def initialize csh, insn, arch
       @arch       = arch
@@ -101,18 +102,11 @@ module Crabstone
     end
 
     def reads? regid
-      # If they gave us a register as a string...
-      if regid.respond_to?( &:upcase )
-        regid = ARCHS[arch].register regid.upcase
-      end
-      Binding.cs_reg_read csh, raw_insn, regid
+      Binding.cs_reg_read csh, raw_insn, ARCH_CLASSES[arch].register( regid )
     end
 
     def writes? regid
-      if regid.respond_to?( &:upcase )
-        regid = ARCHS[arch].register regid.upcase
-      end
-      Binding.cs_reg_write csh, raw_insn, regid
+      Binding.cs_reg_write csh, raw_insn, ARCH_CLASSES[arch].register( regid )
     end
 
     def op_count op_type=nil
@@ -152,9 +146,11 @@ module Crabstone
 
       @arch    = arch
       @mode    = mode
-      csh_ptr = FFI::MemoryPointer.new :ulong_long
-      Binding.cs_open arch, mode, csh_ptr
-      @csh = csh_ptr.read_ulong_long
+      p_uint64 = FFI::MemoryPointer.new :ulong_long
+      p_csh    = FFI::MemoryPointer.new p_uint64
+      Binding.cs_open arch, mode, p_csh
+      @csh     = p_csh.read_ulong_long
+
     end
 
     def close
