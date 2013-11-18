@@ -112,6 +112,7 @@ module TestARM
       ours.puts "0x#{i.address.to_s(16)}: #{i.mnemonic}\t#{i.operand_string}"
       self.print_detail(cs, i, ours)
     end
+    cs.close
   end
 
   ours.rewind

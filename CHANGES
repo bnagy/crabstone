@@ -2,3 +2,5 @@
 * Alpha release.
 = 0.0.2
 * Update tests, add syntax sugar
+= 0.0.3
+* Refactoring and cosmetics

@@ -14,7 +14,7 @@ require_relative 'arch/arm64_registers'
 
 module Crabstone
 
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -146,20 +146,19 @@ module Crabstone
 
   class Disassembler
 
-    attr_reader :arch, :mode, :csh, :cs_hptr
+    attr_reader :arch, :mode, :csh
 
     def initialize arch, mode
 
       @arch    = arch
       @mode    = mode
-      @csh     = FFI::MemoryPointer.new :ulong_long
-      @cs_hptr = FFI::MemoryPointer.new @csh
-
-      Binding.cs_open arch, mode, @cs_hptr
+      csh_ptr = FFI::MemoryPointer.new :ulong_long
+      Binding.cs_open arch, mode, csh_ptr
+      @csh = csh_ptr.read_ulong_long
     end
 
     def close
-      Binding.cs_close cs_hptr.read_ulong_long
+      Binding.cs_close csh
     end
 
     def disasm code, offset, count=0, &blk
@@ -169,7 +168,7 @@ module Crabstone
         insn_ptr   = FFI::MemoryPointer.new insn
         res        = []
         insn_count = Binding.cs_disasm_dyn(
-          cs_hptr.read_ulong_long,
+          csh,
           code,
           code.bytesize,
           offset,
@@ -179,7 +178,7 @@ module Crabstone
 
         (0...insn_count * insn.size).step(insn.size).each {|off|
           cs_insn   = Binding::Instruction.new( insn_ptr.read_pointer+off ).clone
-          this_insn = Instruction.new cs_hptr.read_ulong_long, cs_insn, arch
+          this_insn = Instruction.new csh, cs_insn, arch
           if block_given?
             yield this_insn
           else

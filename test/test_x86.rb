@@ -135,6 +135,7 @@ module TestX86
 
     ours.printf("0x%x:\n", cache.address + cache.size)
     ours.puts
+    cs.close
   end
 
   ours.rewind

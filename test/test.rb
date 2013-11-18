@@ -105,6 +105,7 @@ module Test
       ours.printf("0x%x:\t%s\t\t%s\n",i.address, i.mnemonic, i.operand_string)
       cache = i
     end
+    cs.close
     ours.printf("0x%x:\n", cache.address + cache.size);
     ours.puts
   end

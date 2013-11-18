@@ -93,6 +93,7 @@ module TestARM64
       self.print_detail(cs, i, ours)
       cache = i
     end
+    cs.close
 
     ours.printf("0x%x:\n", cache.address + cache.size)
     ours.puts

@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'crabstone'
-  spec.version    = '0.0.2'
+  spec.version    = '0.0.3'
   spec.author     = 'Ben Nagy'
   spec.license    = 'BSD'
   spec.email      = 'ben@iagu.net'
