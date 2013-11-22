@@ -95,7 +95,7 @@ module TestX86
     if (count=i.op_count(OP_IMM)).nonzero?
       stringio.puts "\timm_count: #{count}"
       i.operands.select(&:imm?).each_with_index {|op,j|
-        stringio.puts "\t\timms[#{j+1}]: 0x#{op.value.to_s(16)}"
+        stringio.puts "\t\timms[#{j+1}]: 0x#{self.uint64(op.value).to_s(16)}"
       }
     end
 
@@ -105,7 +105,7 @@ module TestX86
         if op.reg?
           stringio.puts "\t\toperands[#{c}].type: REG = #{i.reg_name(op.value)}"
         elsif op.imm?
-          stringio.puts "\t\toperands[#{c}].type: IMM = 0x#{op.value.to_s(16)}"
+          stringio.puts "\t\toperands[#{c}].type: IMM = 0x#{self.uint64(op.value).to_s(16)}"
         elsif op.fp?
           stringio.puts "\t\toperands[#{c}].type: FP = 0x#{(self.uint32(op.value))}"
         elsif op.mem?
@@ -156,8 +156,6 @@ module TestX86
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
-    #puts "#{__FILE__}: FAIL"
-    ours.rewind
-    puts ours.read
+    puts "#{__FILE__}: FAIL"
   end
 end
