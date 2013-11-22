@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-# Library by Ngyuen Anh Quynh
+# Library by Nguyen Anh Quynh
 # Original binding by Nguyen Anh Quynh and Tan Sheng Di
 # Additional binding work by Ben Nagy
-# (c) 2013 COSEINC
+# (c) 2013 COSEINC. All Rights Reserved.
 
 require 'crabstone'
 require 'stringio'
@@ -71,18 +71,18 @@ module Test
       'code' => THUMB_CODE,
       'comment' => "THUMB"
     ],
-    # Hash[
-    #   'arch' => ARCH_MIPS,
-    #   'mode' => MODE_32 + MODE_BIG_ENDIAN,
-    #   'code' => MIPS_CODE,
-    #   'comment' => "MIPS-32 (Big-endian)"
-    # ],
-    # Hash[
-    #   'arch' => ARCH_MIPS,
-    #   'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
-    #   'code' => MIPS_CODE2,
-    #   'comment' => "MIPS-64-EL (Little-endian)"
-    # ],
+    Hash[
+      'arch' => ARCH_MIPS,
+      'mode' => MODE_32 + MODE_BIG_ENDIAN,
+      'code' => MIPS_CODE,
+      'comment' => "MIPS-32 (Big-endian)"
+    ],
+    Hash[
+      'arch' => ARCH_MIPS,
+      'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
+      'code' => MIPS_CODE2,
+      'comment' => "MIPS-64-EL (Little-endian)"
+    ],
     Hash[
       'arch' => ARCH_ARM64,
       'mode' => 0,

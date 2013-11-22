@@ -1,7 +1,7 @@
-# Library by Ngyuen Anh Quynh
+# Library by Nguyen Anh Quynh
 # Original binding by Nguyen Anh Quynh and Tan Sheng Di
 # Additional binding work by Ben Nagy
-# (c) 2013 COSEINC
+# (c) 2013 COSEINC. All Rights Reserved.
 
 require 'ffi'
 
@@ -11,10 +11,11 @@ require_relative 'arch/arm'
 require_relative 'arch/arm_registers'
 require_relative 'arch/arm64'
 require_relative 'arch/arm64_registers'
+require_relative 'arch/mips'
 
 module Crabstone
 
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -40,8 +41,8 @@ module Crabstone
       layout(
         :x86, X86::Instruction,
         :arm64, ARM64::Instruction,
-        :arm, ARM::Instruction
-        #mips
+        :arm, ARM::Instruction,
+        :mips, MIPS::Instruction
       )
     end
 
@@ -82,11 +83,11 @@ module Crabstone
     def initialize csh, insn, arch
       @arch       = arch
       @csh        = csh
-      @groups     = insn[:groups].take_while( &:nonzero? )
       @raw_insn   = insn
+      @arch_insn  = raw_insn[:arch][ARCHS[arch]]
       @regs_read  = insn[:regs_read].take_while( &:nonzero? )
       @regs_write = insn[:regs_write].take_while( &:nonzero? )
-      @arch_insn  = raw_insn[:arch][ARCHS[arch]]
+      @groups     = insn[:groups].take_while( &:nonzero? )
     end
 
     def reg_name regid
@@ -101,12 +102,12 @@ module Crabstone
       Binding.cs_insn_group csh, raw_insn, groupid
     end
 
-    def reads? regid
-      Binding.cs_reg_read csh, raw_insn, ARCH_CLASSES[arch].register( regid )
+    def reads? reg
+      Binding.cs_reg_read csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
-    def writes? regid
-      Binding.cs_reg_write csh, raw_insn, ARCH_CLASSES[arch].register( regid )
+    def writes? reg
+      Binding.cs_reg_write csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
     def op_count op_type=nil

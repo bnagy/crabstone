@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.description = <<-EOF 
 
-  Capstone is a disassembly engine written by Ngyuen Anh Quynh, available here
+  Capstone is a disassembly engine written by Nguyen Anh Quynh, available here
   (...). This is the Ruby FFI binding. We test against MRI 1.9.3, 2.0.0 and
   JRuby 1.7.5.
 

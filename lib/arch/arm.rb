@@ -1,7 +1,7 @@
-# Library by Ngyuen Anh Quynh
+# Library by Nguyen Anh Quynh
 # Original binding by Nguyen Anh Quynh and Tan Sheng Di
 # Additional binding work by Ben Nagy
-# (c) 2013 COSEINC
+# (c) 2013 COSEINC. All Rights Reserved.
 
 require 'ffi'
 
@@ -27,7 +27,7 @@ module Crabstone
     class OperandValue < FFI::Union
       layout(
         :reg, :uint,
-        :imm, :ulong_long,
+        :imm, :long_long,
         :fp, :double,
         :mem, MemoryOperand
       )
@@ -87,8 +87,8 @@ module Crabstone
     class Instruction < FFI::Struct
       layout(
         :cc, :uint,
-        :writeback, :bool,
         :update_flags, :bool,
+        :writeback, :bool,
         :op_count, :uint8,
         :operands, [Operand, 32]
       )

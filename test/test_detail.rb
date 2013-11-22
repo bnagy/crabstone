@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-# Library by Ngyuen Anh Quynh
+# Library by Nguyen Anh Quynh
 # Original binding by Nguyen Anh Quynh and Tan Sheng Di
 # Additional binding work by Ben Nagy
-# (c) 2013 COSEINC
+# (c) 2013 COSEINC. All Rights Reserved.
 
 require 'crabstone'
 require 'stringio'
@@ -16,9 +16,10 @@ module TestDetail
   ARM_CODE2 = "\x10\xf1\x10\xe7\x11\xf2\x31\xe7\xdc\xa1\x2e\xf3\xe8\x4e\x62\xf3"
   THUMB_CODE = "\x70\x47\xeb\x46\x83\xb0\xc9\x68"
   THUMB_CODE2 = "\x4f\xf0\x00\x01\xbd\xe8\x00\x88\xd1\xe8\x00\xf0"
-  # MIPS_CODE = "\x0C\x10\x00\x97\x00\x00\x00\x00\x24\x02\x00\x0c\x8f\xa2\x00\x00\x34\x21\x34\x56"
-  # MIPS_CODE2 = "\x56\x34\x21\x34\xc2\x17\x01\x00"
-  ARM64_CODE = "\x21\x7c\x02\x9b\x21\x7c\x00\x53\x00\x40\x21\x4b\xe1\x0b\x40\xb9"
+  MIPS_CODE = "\x0C\x10\x00\x97\x00\x00\x00\x00\x24\x02\x00\x0c\x8f\xa2\x00\x00\x34\x21\x34\x56"
+  MIPS_CODE2 = "\x56\x34\x21\x34\xc2\x17\x01\x00"
+  ARM64_CODE = "\x21\x7c\x02\x9b\x21\x7c\x00\x53\x00\x40\x21\x4b\xe1\x0b\x40\xb9\x10\x20\x21\x1e"
+
 
   include Crabstone
 
@@ -71,18 +72,18 @@ module TestDetail
       'code' => THUMB_CODE,
       'comment' => "THUMB"
     ],
-    # Hash[
-    #   'arch' => ARCH_MIPS,
-    #   'mode' => MODE_32 + MODE_BIG_ENDIAN,
-    #   'code' => MIPS_CODE,
-    #   'comment' => "MIPS-32 (Big-endian)"
-    # ],
-    # Hash[
-    #   'arch' => ARCH_MIPS,
-    #   'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
-    #   'code' => MIPS_CODE2,
-    #   'comment' => "MIPS-64-EL (Little-endian)"
-    # ],
+    Hash[
+      'arch' => ARCH_MIPS,
+      'mode' => MODE_32 + MODE_BIG_ENDIAN,
+      'code' => MIPS_CODE,
+      'comment' => "MIPS-32 (Big-endian)"
+    ],
+    Hash[
+      'arch' => ARCH_MIPS,
+      'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
+      'code' => MIPS_CODE2,
+      'comment' => "MIPS-64-EL (Little-endian)"
+    ],
     Hash[
       'arch' => ARCH_ARM64,
       'mode' => 0,

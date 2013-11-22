@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-# Library by Ngyuen Anh Quynh
+# Library by Nguyen Anh Quynh
 # Original binding by Nguyen Anh Quynh and Tan Sheng Di
 # Additional binding work by Ben Nagy
-# (c) 2013 COSEINC
+# (c) 2013 COSEINC. All Rights Reserved.
 
 # This is UGLY, but it's ported C test code, sorry. :(
 
@@ -19,7 +19,12 @@ module TestX86
   include Crabstone::X86
 
   @platforms = [
-
+    Hash[
+      'arch' => ARCH_X86,
+      'mode' => MODE_16,
+      'code' => X86_CODE16,
+      'comment' => "X86 16bit (Intel syntax)"
+    ],
     Hash[
       'arch' => ARCH_X86,
       'mode' => MODE_32 + MODE_SYNTAX_ATT,
@@ -31,12 +36,6 @@ module TestX86
       'mode' => MODE_32,
       'code' => X86_CODE32,
       'comment' => "X86 32 (Intel syntax)"
-    ],
-    Hash[
-      'arch' => ARCH_X86,
-      'mode' => MODE_16,
-      'code' => X86_CODE16,
-      'comment' => "X86 16bit (Intel syntax)"
     ],
     Hash[
       'arch' => ARCH_X86,
@@ -157,6 +156,8 @@ module TestX86
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
-    puts "#{__FILE__}: FAIL"
+    #puts "#{__FILE__}: FAIL"
+    ours.rewind
+    puts ours.read
   end
 end
