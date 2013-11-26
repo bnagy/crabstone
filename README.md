@@ -4,9 +4,11 @@ Check out the test/ directory for examples.
 
 To install (until we publish a gem) do this:
 
-1. bash```gem build crabstone.gemspec```
-2. bash```gem install -l crabstone-0.0.*.gem``` ( currently 0.0.3 )
-3. bash```rake test```, if you want.
+```bash
+gem build crabstone.gemspec
+gem install -l crabstone-0.0.*.gem
+rake test
+```
 
 Library Author: Nguyen Anh Quynh
 Binding Authors: Nguyen Anh Quynh, Tan Sheng Di, Ben Nagy
