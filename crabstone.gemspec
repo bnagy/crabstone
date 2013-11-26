@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'crabstone'
-  spec.version    = '0.0.3'
+  spec.version    = '0.0.5'
   spec.author     = 'Ben Nagy'
   spec.license    = 'BSD'
   spec.email      = 'ben@iagu.net'
@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.test_files = Dir['test/*.rb']
   spec.files      = Dir['**/*'].delete_if{ |item| item.include?('git') }
 
-  spec.extra_rdoc_files = ['CHANGES', 'README', 'MANIFEST']
+  spec.extra_rdoc_files = ['CHANGES', 'README.md', 'MANIFEST']
 
   spec.add_dependency('ffi')
   spec.add_development_dependency('test-unit')

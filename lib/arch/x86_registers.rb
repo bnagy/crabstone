@@ -236,14 +236,15 @@ module Crabstone
       "R15W"   => 232
     }
     ID_LOOKUP = REG_LOOKUP.invert
+    SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
 
     def self.register reg
       return reg if ID_LOOKUP[reg]
+      return SYM_LOOKUP[reg] if SYM_LOOKUP[reg]
       if reg.respond_to? :upcase
-        REG_LOOKUP[reg.upcase] || REG_LOOKUP['INVALID']
-      else
-        REG_LOOKUP['INVALID']
+        return REG_LOOKUP[reg.upcase] || REG_LOOKUP['INVALID']
       end
+      REG_LOOKUP['INVALID']
     end
 
   end

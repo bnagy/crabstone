@@ -78,16 +78,16 @@ module TestX86
       end
     end
 
-    if i.reads?( 'eax' ) || i.reads?( 19 ) || i.reads?( REG_EAX )
+    if i.reads_reg?( :eax ) || i.reads_reg?( 19 ) || i.reads_reg?( REG_EAX )
       print '[eax:r]'
-      unless i.reads?( 'eax' ) && i.reads?( 19 ) && i.reads?( REG_EAX )
+      unless i.reads_reg?( :eax ) && i.reads_reg?( 'eax' ) && i.reads_reg?( 19 ) && i.reads_reg?( REG_EAX )
         fail "Error in reg read decomposition"
       end
     end
 
-    if i.writes?( 'eax' ) || i.writes?( 19 ) || i.writes?( REG_EAX )
+    if i.writes_reg?( 'eax' ) || i.writes_reg?( 19 ) || i.writes_reg?( REG_EAX )
       print '[eax:w]'
-      unless i.writes?( 'eax' ) && i.writes?( 19 ) && i.writes?( REG_EAX )
+      unless i.writes_reg?( 'eax' ) && i.writes_reg?( 19 ) && i.writes_reg?( REG_EAX )
         fail "Error in reg write decomposition"
       end
     end
@@ -131,6 +131,12 @@ module TestX86
   ours = StringIO.new
 
   #Test through all modes and architectures
+  begin
+    cs    = Disassembler.new(0,0)
+    print "x86 Test: Capstone v #{cs.version.join('.')} - "
+  ensure
+    cs.close
+  end
   @platforms.each do |p|
     ours.puts "****************"
     ours.puts "Platform: #{p['comment']}"

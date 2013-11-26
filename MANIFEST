@@ -2,12 +2,14 @@
 * MANIFEST
 * LICENSE
 * Rakefile
-* README
+* README.md
 
 * lib/arch/arm.rb
 * lib/arch/arm_registers.rb
 * lib/arch/arm64.rb
 * lib/arch/arm64_registers.rb
+* lib/arch/mips.rb
+* lib/arch/mips_registers.rb
 * lib/arch/x86.rb
 * lib/arch/x86_registers.rb
 
@@ -21,5 +23,7 @@
 * test/test_arm64.rb.SPEC
 * test/test_detail.rb
 * test/test_detail.rb.SPEC
+* test/test_mips.rb
+* test/test_mips.rb.SPEC
 * test/test_x86.rb
 * test/test_x86.rb.SPEC

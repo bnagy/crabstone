@@ -12,10 +12,11 @@ require_relative 'arch/arm_registers'
 require_relative 'arch/arm64'
 require_relative 'arch/arm64_registers'
 require_relative 'arch/mips'
+require_relative 'arch/mips_registers'
 
 module Crabstone
 
-  VERSION = '0.0.3'
+  VERSION = '0.0.5'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -31,6 +32,22 @@ module Crabstone
   MODE_THUMB         = 1 << 4
   MODE_SYNTAX_ATT    = 1 << 30
   MODE_BIG_ENDIAN    = 1 << 31
+
+  class ErrOK < StandardError; end
+  class ErrMem < StandardError; end
+  class ErrArch < StandardError; end
+  class ErrHandle < StandardError; end
+  class ErrCsh < StandardError; end
+  class ErrMode < StandardError; end
+
+  ERRNO = {
+    0 => ErrOK,
+    1 => ErrMem,
+    2 => ErrArch,
+    3 => ErrHandle,
+    4 => ErrCsh,
+    5 => ErrMode
+  }
 
   module Binding
 
@@ -61,16 +78,17 @@ module Crabstone
     end
 
     attach_function :cs_disasm_dyn, [:ulong_long, :pointer, :ulong_long, :ulong_long, :ulong_long, :pointer], :ulong_long
-    attach_function :cs_open, [:int, :ulong, :pointer], :bool
+    attach_function :cs_open, [:int, :ulong, :pointer], :int
     attach_function :cs_free, [:pointer], :void
-    attach_function :cs_close, [:ulong_long], :bool
+    attach_function :cs_close, [:ulong_long], :int
     attach_function :cs_reg_name, [:ulong_long, :uint], :pointer
     attach_function :cs_insn_name, [:ulong_long, :uint], :pointer
     attach_function :cs_insn_group, [:ulong_long, :pointer, :uint], :bool
     attach_function :cs_reg_read, [:ulong_long, :pointer, :uint], :bool
     attach_function :cs_reg_write, [:ulong_long, :pointer, :uint], :bool
     attach_function :cs_op_count, [:ulong_long, :pointer, :uint], :int
-    attach_function :cs_op_index, [:ulong_long, :pointer, :uint, :uint], :int
+    attach_function :cs_version, [:pointer, :pointer], :void
+    attach_function :cs_errno, [:ulong_long], :int
 
   end # Binding
 
@@ -78,7 +96,7 @@ module Crabstone
 
     attr_reader :arch, :csh, :groups, :raw_insn, :regs_read, :regs_write
     ARCHS = { arm: ARCH_ARM, arm64: ARCH_ARM64, x86: ARCH_X86, mips: ARCH_MIPS}.invert
-    ARCH_CLASSES = { ARCH_ARM => ARM, ARCH_ARM64 => ARM64, ARCH_X86 => X86}
+    ARCH_CLASSES = { ARCH_ARM => ARM, ARCH_ARM64 => ARM64, ARCH_X86 => X86, ARCH_MIPS => MIPS}
 
     def initialize csh, insn, arch
       @arch       = arch
@@ -102,11 +120,11 @@ module Crabstone
       Binding.cs_insn_group csh, raw_insn, groupid
     end
 
-    def reads? reg
+    def reads_reg? reg
       Binding.cs_reg_read csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
-    def writes? reg
+    def writes_reg? reg
       Binding.cs_reg_write csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
@@ -116,10 +134,6 @@ module Crabstone
       else
         self.operands.size
       end
-    end
-
-    def op_index op_type, position
-      Binding.cs_op_index csh, raw_insn, op_type, position
     end
 
     def method_missing meth, *args
@@ -149,16 +163,34 @@ module Crabstone
       @mode    = mode
       p_uint64 = FFI::MemoryPointer.new :ulong_long
       p_csh    = FFI::MemoryPointer.new p_uint64
-      Binding.cs_open arch, mode, p_csh
+      if ( res = Binding.cs_open( arch, mode, p_csh )).nonzero?
+        raise ERRNO[res]
+      end
       @csh     = p_csh.read_ulong_long
 
     end
 
     def close
-      Binding.cs_close csh
+      if (res = Binding.cs_close(csh) ).nonzero?
+        raise ERRNO[res]
+      end
+    end
+
+    def version
+      maj = FFI::MemoryPointer.new(:int)
+      min = FFI::MemoryPointer.new(:int)
+      Binding.cs_version maj, min
+      [ maj.read_int, min.read_int ]
+    end
+
+    def errno
+      Binding.cs_errno(csh)
     end
 
     def disasm code, offset, count=0, &blk
+
+      return [] if code.empty?
+
       begin
 
         insn       = Binding::Instruction.new
@@ -172,6 +204,10 @@ module Crabstone
           count,
           insn_ptr
         )
+
+        if insn_count==0
+          raise ERRNO[errno]
+        end
 
         (0...insn_count * insn.size).step(insn.size).each {|off|
           cs_insn   = Binding::Instruction.new( insn_ptr.read_pointer+off ).clone

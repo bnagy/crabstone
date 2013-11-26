@@ -38,16 +38,16 @@ module TestARM64
       sio.puts "\tWriteback: True"
     end
 
-    if insn.reads?( 'x0' ) || insn.reads?( 197 ) || insn.reads?( REG_X0 )
+    if insn.reads_reg?( 'x0' ) || insn.reads_reg?( 197 ) || insn.reads_reg?( REG_X0 )
       print '[x0:r]'
-      unless insn.reads?( 'x0' ) && insn.reads?( 197 ) && insn.reads?( REG_X0 )
+      unless insn.reads_reg?( 'x0' ) && insn.reads_reg?( 197 ) && insn.reads_reg?( REG_X0 )
         fail "Error in reg read decomposition"
       end
     end
 
-    if insn.writes?( 'x0' ) || insn.writes?( 197 ) || insn.writes?( REG_X0 )
+    if insn.writes_reg?( 'x0' ) || insn.writes_reg?( 197 ) || insn.writes_reg?( REG_X0 )
       print '[x0:w]'
-      unless insn.writes?( 'x0' ) && insn.writes?( 197 ) && insn.writes?( REG_X0 )
+      unless insn.writes_reg?( 'x0' ) && insn.writes_reg?( 197 ) && insn.writes_reg?( REG_X0 )
         fail "Error in reg write decomposition"
       end
     end

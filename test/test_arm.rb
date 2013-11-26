@@ -56,16 +56,16 @@ module TestARM
   def self.print_detail(cs, i, sio)
 
 
-    if i.reads?( 'sp' ) || i.reads?( 12 ) || i.reads?( REG_SP )
+    if i.reads_reg?( 'sp' ) || i.reads_reg?( 12 ) || i.reads_reg?( REG_SP )
       print '[sp:r]'
-      unless i.reads?( 'sp' ) && i.reads?( 12 ) && i.reads?( REG_SP )
+      unless i.reads_reg?( 'sp' ) && i.reads_reg?( 12 ) && i.reads_reg?( REG_SP )
         fail "Error in reg read decomposition"
       end
     end
 
-    if i.writes?( 'lr' ) || i.writes?( 10 ) || i.writes?( REG_LR )
+    if i.writes_reg?( 'lr' ) || i.writes_reg?( 10 ) || i.writes_reg?( REG_LR )
       print '[lr:w]'
-      unless i.writes?( 'lr' ) && i.writes?( 10 ) && i.writes?( REG_LR )
+      unless i.writes_reg?( 'lr' ) && i.writes_reg?( 10 ) && i.writes_reg?( REG_LR )
         fail "Error in reg write decomposition"
       end
     end

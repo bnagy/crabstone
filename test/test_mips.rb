@@ -34,8 +34,10 @@ module TestMIPS
   end
 
   def self.print_detail(cs, insn, sio)
-
     if insn.op_count > 0
+      if insn.writes_reg? :ra
+        print "[w:ra]"
+      end
       sio.puts "\top_count: #{insn.op_count}"
       insn.operands.each_with_index do |op,idx|
         case op[:type]

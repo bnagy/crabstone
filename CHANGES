@@ -4,3 +4,7 @@
 * Update tests, add syntax sugar
 = 0.0.3
 * Refactoring and cosmetics
+= 0.0.4
+* Verify MIPS support, tests, slight API changes
+= 0.0.5
+* API changes including cs_errno.
