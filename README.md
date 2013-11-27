@@ -29,3 +29,4 @@ it's a bug. If it doesn't work with like Rubinius or REE or 1.8 or whatever then
 	License: BSD style - details in the LICENSE file
 
 	(c) 2013 COSEINC. All Rights Reserved.
+
