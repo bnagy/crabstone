@@ -102,7 +102,7 @@ module Test
     cs = Disassembler.new(p['arch'], p['mode'])
     cache = nil
     cs.disasm(p['code'], 0x1000).each do |i|
-      ours.printf("0x%x:\t%s\t\t%s\n",i.address, i.mnemonic, i.operand_string)
+      ours.printf("0x%x:\t%s\t\t%s\n",i.address, i.mnemonic, i.op_str)
       cache = i
     end
     cs.close

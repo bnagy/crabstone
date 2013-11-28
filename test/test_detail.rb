@@ -123,7 +123,7 @@ module TestDetail
         "0x%x:\t%s\t\t%s ",
         insn.address,
         insn.mnemonic,
-        insn.operand_string
+        insn.op_str
       )
       if insn.id.nonzero? then
         ours.printf(

@@ -128,7 +128,7 @@ module TestARM
     cs = Disassembler.new(p['arch'], p['mode'])
     cache = nil
     cs.disasm(p['code'], 0x1000).each do |i|
-      ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.operand_string}"
+      ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
       self.print_detail(cs, i, ours)
       cache = i
     end

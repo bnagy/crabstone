@@ -69,7 +69,7 @@ module Crabstone
         :address, :ulong_long,
         :size, :uint16,
         :mnemonic, [:char, 32],
-        :operand_string, [:char, 96],
+        :op_str, [:char, 96],
         :regs_read, [:uint, 32],
         :regs_write, [:uint, 32],
         :groups, [:uint, 8],
