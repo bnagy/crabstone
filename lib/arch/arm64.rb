@@ -20,14 +20,14 @@ module Crabstone
       layout(
         :base, :uint,
         :index, :uint,
-        :disp, :int64
+        :disp, :int32
       )
     end
 
     class OperandValue < FFI::Union
       layout(
         :reg, :uint,
-        :imm, :long_long,
+        :imm, :int32,
         :fp, :double,
         :mem, MemoryOperand
       )
@@ -105,7 +105,7 @@ module Crabstone
         :writeback, :bool,
         :update_flags, :bool,
         :op_count, :uint8,
-        :operands, [Operand, 32]
+        :operands, [Operand, 8]
       )
       
       def operands
@@ -745,6 +745,20 @@ module Crabstone
     INS_USUBW     = 351
     INS_UXTB      = 352
     INS_UXTH      = 353
+
+    # alias insn
+    INS_MNEG   = 354
+    INS_UMNEGL = 355
+    INS_SMNEGL = 356
+    INS_MOV    = 357
+    INS_NOP    = 358
+    INS_YIELD  = 359
+    INS_WFE    = 360
+    INS_WFI    = 361
+    INS_SEV    = 362
+    INS_SEVL   = 363
+    INS_NGC    = 364
+    INS_NEG    = 365
 
     # ARM64 group of instructions
     GRP_INVALID = 0

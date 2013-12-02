@@ -77,7 +77,11 @@ module Crabstone
       )
     end
 
-    attach_function :cs_disasm_dyn, [:ulong_long, :pointer, :ulong_long, :ulong_long, :ulong_long, :pointer], :ulong_long
+    attach_function(
+      :cs_disasm_dyn,
+      [:size_t, :pointer, :size_t, :size_t, :size_t, :pointer],
+      :size_t
+    )
     attach_function :cs_open, [:int, :ulong, :pointer], :int
     attach_function :cs_free, [:pointer], :void
     attach_function :cs_close, [:ulong_long], :int
@@ -109,11 +113,15 @@ module Crabstone
     end
 
     def reg_name regid
-      Binding.cs_reg_name(csh, regid).read_string
+      ptr = Binding.cs_reg_name(csh, regid)
+      raise ErrCsh if ptr.null?
+      ptr.read_string
     end
 
     def insn_name
-      Binding.cs_insn_name(csh, id).read_string
+      ptr = Binding.cs_insn_name(csh, id)
+      raise ErrCsh if ptr.null?
+      ptr.read_string
     end
 
     def group? groupid
@@ -161,13 +169,16 @@ module Crabstone
 
       @arch    = arch
       @mode    = mode
-      p_uint64 = FFI::MemoryPointer.new :ulong_long
-      p_csh    = FFI::MemoryPointer.new p_uint64
+      p_size_t = FFI::MemoryPointer.new :size_t
+      p_csh    = FFI::MemoryPointer.new p_size_t
       if ( res = Binding.cs_open( arch, mode, p_csh )).nonzero?
         raise ERRNO[res]
       end
-      @csh     = p_csh.read_ulong_long
-
+      if FFI::TypeDefs[:size_t].size == 8
+        @csh     = p_csh.read_ulong_long
+      else
+        @csh     = p_csh.read_ulong
+      end
     end
 
     def close

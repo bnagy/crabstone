@@ -20,14 +20,14 @@ module Crabstone
         :base, :uint,
         :index, :uint,
         :scale, :int,
-        :disp, :int64
+        :disp, :int
       )
     end
 
     class OperandValue < FFI::Union
       layout(
         :reg, :uint,
-        :imm, :long_long,
+        :imm, :uint,
         :fp, :double,
         :mem, MemoryOperand
       )
@@ -90,7 +90,7 @@ module Crabstone
         :update_flags, :bool,
         :writeback, :bool,
         :op_count, :uint8,
-        :operands, [Operand, 32]
+        :operands, [Operand, 20]
       )
 
       def operands

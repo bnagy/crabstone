@@ -95,7 +95,7 @@ module TestARM
             sio.puts "\t\t\toperands[#{idx}].mem.scale = %u" % op[:value][:mem][:scale]
           end
           if op[:value][:mem][:disp] != 0 then
-            sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x#{self.uint64(op.value[:disp]).to_s(16)}"
+            sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x#{self.uint32(op.value[:disp]).to_s(16)}"
           end
         end
         if op[:shift][:type] != SFT_INVALID &&
@@ -143,6 +143,8 @@ module TestARM
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
+    ours.rewind
+    puts ours.read
     puts "#{__FILE__}: FAIL"
   end
 end

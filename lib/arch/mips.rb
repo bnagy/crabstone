@@ -64,7 +64,7 @@ module Crabstone
     class Instruction < FFI::Struct
       layout(
         :op_count, :uint8,
-        :operands, [Operand, 32]
+        :operands, [Operand, 8]
       )
 
       def operands
