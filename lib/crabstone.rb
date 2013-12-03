@@ -71,8 +71,11 @@ module Crabstone
         :mnemonic, [:char, 32],
         :op_str, [:char, 96],
         :regs_read, [:uint, 32],
+        :regs_read_count, :uint,
         :regs_write, [:uint, 32],
+        :regs_write_count, :uint,
         :groups, [:uint, 8],
+        :groups_count, :uint,
         :arch, Architecture
       )
     end
@@ -107,9 +110,9 @@ module Crabstone
       @csh        = csh
       @raw_insn   = insn
       @arch_insn  = raw_insn[:arch][ARCHS[arch]]
-      @regs_read  = insn[:regs_read].take_while( &:nonzero? )
-      @regs_write = insn[:regs_write].take_while( &:nonzero? )
-      @groups     = insn[:groups].take_while( &:nonzero? )
+      @regs_read  = insn[:regs_read].first insn[:regs_read_count]
+      @regs_write = insn[:regs_write].first insn[:regs_write_count]
+      @groups     = insn[:groups].first insn[:groups_count]
     end
 
     def reg_name regid
@@ -216,12 +219,10 @@ module Crabstone
           insn_ptr
         )
 
-        if insn_count==0
-          raise ERRNO[errno]
-        end
+        raise ERRNO[errno] if insn_count.zero?
 
-        (0...insn_count * insn.size).step(insn.size).each {|off|
-          cs_insn   = Binding::Instruction.new( insn_ptr.read_pointer+off ).clone
+        (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
+          cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset ).clone
           this_insn = Instruction.new csh, cs_insn, arch
           if block_given?
             yield this_insn

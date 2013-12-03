@@ -1589,5 +1589,6 @@ module Crabstone
     GRP_SSSE3    = 26
     GRP_PCLMUL   = 27
     GRP_XOP      = 28
+    GRP_JUMP     = 29
   end
 end

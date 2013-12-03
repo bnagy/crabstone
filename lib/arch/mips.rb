@@ -721,7 +721,7 @@ module Crabstone
     GRP_NONANSFPMATH = 15
     GRP_NOTFP64BIT   = 16
     GRP_RELOCSTATIC  = 17
-    GRP_MAX          = 18
+    GRP_JUMP         = 18
 
   end
 end

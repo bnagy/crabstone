@@ -763,5 +763,6 @@ module Crabstone
     # ARM64 group of instructions
     GRP_INVALID = 0
     GRP_NEON    = 1
+    GRP_JUMP    = 2
   end
 end

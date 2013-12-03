@@ -737,5 +737,6 @@ module Crabstone
     GRP_PREV8         = 26
     GRP_FPVMLX        = 27
     GRP_MULOPS        = 28
+    GRP_JUMP          = 29
   end
 end
