@@ -57,14 +57,14 @@ module TestARM
 
 
     if i.reads_reg?( 'sp' ) || i.reads_reg?( 12 ) || i.reads_reg?( REG_SP )
-      print '[sp:r]'
+      print '[sp:r] '
       unless i.reads_reg?( 'sp' ) && i.reads_reg?( 12 ) && i.reads_reg?( REG_SP )
         fail "Error in reg read decomposition"
       end
     end
 
     if i.writes_reg?( 'lr' ) || i.writes_reg?( 10 ) || i.writes_reg?( REG_LR )
-      print '[lr:w]'
+      print '[lr:w] '
       unless i.writes_reg?( 'lr' ) && i.writes_reg?( 10 ) && i.writes_reg?( REG_LR )
         fail "Error in reg write decomposition"
       end
@@ -74,7 +74,7 @@ module TestARM
       sio.puts "\top_count: #{i.op_count}"
       i.operands.each.with_index do |op,idx|
         if op[:type] == OP_REG
-          sio.puts "\t\toperands[#{idx}].type: REG = #{i.reg_name(op[:value][:reg])}"
+          sio.puts "\t\toperands[#{idx}].type: REG = #{cs.reg_name(op[:value][:reg])}"
         elsif op[:type] == OP_IMM
           sio.puts "\t\toperands[#{idx}].type: IMM = 0x#{self.uint64(op.value).to_s(16)}"
         elsif op[:type] == OP_FP
@@ -86,10 +86,10 @@ module TestARM
         elsif op[:type] == OP_MEM then
           sio.puts "\t\toperands[#{idx}].type: MEM"
           if op[:value][:mem][:base] != 0 then
-            sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % i.reg_name(op[:value][:mem][:base])
+            sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % cs.reg_name(op[:value][:mem][:base])
           end
           if op[:value][:mem][:index] != 0 then
-            sio.puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % i.reg_name(op[:value][:mem][:index])
+            sio.puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % cs.reg_name(op[:value][:mem][:index])
           end
           if op[:value][:mem][:scale] != 1 then
             sio.puts "\t\t\toperands[#{idx}].mem.scale = %u" % op[:value][:mem][:scale]
@@ -118,6 +118,13 @@ module TestARM
   end
 
   ours = StringIO.new
+
+  begin
+    cs = Disassembler.new(0,0)
+    print "ARM Test: Capstone v #{cs.version.join('.')} - "
+  ensure
+    cs.close
+  end
 
   #Test through all modes and architectures
   @platforms.each do |p|

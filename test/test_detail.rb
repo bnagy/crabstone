@@ -32,8 +32,9 @@ module TestDetail
     ],
     Hash[
       'arch' => ARCH_X86,
-      'mode' => MODE_32 + MODE_SYNTAX_ATT,
+      'mode' => MODE_32,
       'code' => INTEL_CODE32,
+      'syntax' => :att,
       'comment' => "X86 32bit (ATT syntax)"
     ],
     Hash[
@@ -92,14 +93,14 @@ module TestDetail
     ]
   ]
 
-  def self.print_detail(insn, sio)
+  def self.print_detail cs, insn, sio
     if insn.regs_read.any?
-      read = insn.regs_read.map {|r| insn.reg_name r}.join(' ')
+      read = insn.regs_read.map {|r| cs.reg_name r}.join(' ')
       sio.puts "\tImplicit registers read: #{read} "
     end
 
     if insn.regs_write.any?
-      written = insn.regs_write.map {|r| insn.reg_name r}.join(' ')
+      written = insn.regs_write.map {|r| cs.reg_name r}.join(' ')
       sio.puts "\tImplicit registers modified: #{written} "
     end
 
@@ -110,6 +111,13 @@ module TestDetail
 
   ours = StringIO.new
 
+  begin
+    cs    = Disassembler.new(0,0)
+    print "Detailed Test: Capstone v #{cs.version.join('.')} - "
+  ensure
+    cs.close
+  end
+
   #Test through all modes and architectures
   @platforms.each do |p|
     ours.puts "****************"
@@ -117,6 +125,9 @@ module TestDetail
     ours.puts "Code: #{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
     ours.puts "Disasm:"
     cs = Disassembler.new(p['arch'], p['mode'])
+    if p['syntax']
+      cs.syntax = p['syntax']
+    end
     cache = nil
     cs.disasm(p['code'], 0x1000) do |insn|
       ours.printf(
@@ -129,10 +140,10 @@ module TestDetail
         ours.printf(
           "// insn-ID: %u, insn-mnem: %s\n",
           insn.id,
-          insn.insn_name
+          insn.name
         )
       end
-      self.print_detail insn, ours
+      self.print_detail cs, insn, ours
       cache = insn
     end
     ours.printf("0x%x:\n", cache.address + cache.size)

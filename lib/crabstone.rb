@@ -16,7 +16,7 @@ require_relative 'arch/mips_registers'
 
 module Crabstone
 
-  VERSION = '0.0.5'
+  VERSION = '0.0.6'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -33,12 +33,20 @@ module Crabstone
   MODE_SYNTAX_ATT    = 1 << 30
   MODE_BIG_ENDIAN    = 1 << 31
 
-  class ErrOK < StandardError; end
-  class ErrMem < StandardError; end
+  # Option types and values ( so far ) for cs_option()
+  OPT_SYNTAX = 1
+  SYNTAX = {
+    :intel => 1,
+    :att   => 2
+  }
+
   class ErrArch < StandardError; end
-  class ErrHandle < StandardError; end
   class ErrCsh < StandardError; end
+  class ErrHandle < StandardError; end
+  class ErrMem < StandardError; end
   class ErrMode < StandardError; end
+  class ErrOK < StandardError; end
+  class ErrOption < StandardError; end
 
   ERRNO = {
     0 => ErrOK,
@@ -46,13 +54,31 @@ module Crabstone
     2 => ErrArch,
     3 => ErrHandle,
     4 => ErrCsh,
-    5 => ErrMode
+    5 => ErrMode,
+    6 => ErrOption
   }
 
   module Binding
 
     extend FFI::Library
     ffi_lib 'capstone'
+
+    # This is because JRuby FFI on x64 Windows thinks size_t is 32 bit
+    case FFI::Platform::ADDRESS_SIZE
+    when 64
+      typedef :ulong_long, :size_t
+    when 32
+      typedef :ulong, :size_t
+    else
+      fail "Unsupported native address size"
+    end
+
+    typedef :size_t, :csh
+    typedef :size_t, :cs_opt_value
+    typedef :uint, :cs_opt_type
+    typedef :uint, :cs_err
+    typedef :uint, :cs_arch
+    typedef :uint, :cs_mode
 
     class Architecture < FFI::Union
       layout(
@@ -68,6 +94,7 @@ module Crabstone
         :id, :uint,
         :address, :ulong_long,
         :size, :uint16,
+        :bytes, [:uchar, 16],
         :mnemonic, [:char, 32],
         :op_str, [:char, 96],
         :regs_read, [:uint, 32],
@@ -82,20 +109,21 @@ module Crabstone
 
     attach_function(
       :cs_disasm_dyn,
-      [:size_t, :pointer, :size_t, :size_t, :size_t, :pointer],
+      [:csh, :pointer, :size_t, :ulong_long, :size_t, :pointer],
       :size_t
     )
-    attach_function :cs_open, [:int, :ulong, :pointer], :int
+    attach_function :cs_close, [:csh], :cs_err
+    attach_function :cs_errno, [:csh], :cs_err
     attach_function :cs_free, [:pointer], :void
-    attach_function :cs_close, [:ulong_long], :int
-    attach_function :cs_reg_name, [:ulong_long, :uint], :pointer
-    attach_function :cs_insn_name, [:ulong_long, :uint], :pointer
-    attach_function :cs_insn_group, [:ulong_long, :pointer, :uint], :bool
-    attach_function :cs_reg_read, [:ulong_long, :pointer, :uint], :bool
-    attach_function :cs_reg_write, [:ulong_long, :pointer, :uint], :bool
-    attach_function :cs_op_count, [:ulong_long, :pointer, :uint], :int
+    attach_function :cs_insn_group, [:csh, Instruction, :uint], :bool
+    attach_function :cs_insn_name, [:csh, :uint], :string
+    attach_function :cs_op_count, [:csh, Instruction, :uint], :cs_err
+    attach_function :cs_open, [:cs_arch, :cs_mode, :pointer], :cs_err
+    attach_function :cs_option, [:csh, :cs_opt_type, :cs_opt_value], :cs_err
+    attach_function :cs_reg_name, [:csh, :uint], :string
+    attach_function :cs_reg_read, [:csh, Instruction, :uint], :bool
+    attach_function :cs_reg_write, [:csh, Instruction, :uint], :bool
     attach_function :cs_version, [:pointer, :pointer], :void
-    attach_function :cs_errno, [:ulong_long], :int
 
   end # Binding
 
@@ -115,16 +143,10 @@ module Crabstone
       @groups     = insn[:groups].first insn[:groups_count]
     end
 
-    def reg_name regid
-      ptr = Binding.cs_reg_name(csh, regid)
-      raise ErrCsh if ptr.null?
-      ptr.read_string
-    end
-
-    def insn_name
-      ptr = Binding.cs_insn_name(csh, id)
-      raise ErrCsh if ptr.null?
-      ptr.read_string
+    def name
+      name = Binding.cs_insn_name(csh, id)
+      raise ErrCsh unless name
+      name
     end
 
     def group? groupid
@@ -166,28 +188,32 @@ module Crabstone
 
   class Disassembler
 
-    attr_reader :arch, :mode, :csh
+    attr_reader :arch, :mode, :csh, :syntax
 
     def initialize arch, mode
 
       @arch    = arch
       @mode    = mode
-      p_size_t = FFI::MemoryPointer.new :size_t
+      p_size_t = FFI::MemoryPointer.new :ulong_long
       p_csh    = FFI::MemoryPointer.new p_size_t
       if ( res = Binding.cs_open( arch, mode, p_csh )).nonzero?
         raise ERRNO[res]
       end
-      if FFI::TypeDefs[:size_t].size == 8
-        @csh     = p_csh.read_ulong_long
-      else
-        @csh     = p_csh.read_ulong
-      end
+      @csh = p_csh.read_ulong_long
     end
 
     def close
       if (res = Binding.cs_close(csh) ).nonzero?
         raise ERRNO[res]
       end
+    end
+
+    def syntax= new_stx
+      raise ErrOption, "Unknown Syntax. Try :intel or :att" unless SYNTAX[new_stx]
+      if (res = Binding.cs_option(csh, OPT_SYNTAX, SYNTAX[new_stx])).nonzero?
+        raise ERRNO[res]
+      end
+      @syntax = new_stx
     end
 
     def version
@@ -199,6 +225,12 @@ module Crabstone
 
     def errno
       Binding.cs_errno(csh)
+    end
+
+    def reg_name regid
+      name = Binding.cs_reg_name(csh, regid)
+      raise ErrCsh unless name
+      name
     end
 
     def disasm code, offset, count=0, &blk

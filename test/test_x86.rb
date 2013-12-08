@@ -27,8 +27,9 @@ module TestX86
     ],
     Hash[
       'arch' => ARCH_X86,
-      'mode' => MODE_32 + MODE_SYNTAX_ATT,
+      'mode' => MODE_32,
       'code' => X86_CODE32,
+      'syntax' => :att,
       'comment' => "X86 32 (AT&T syntax)"
     ],
     Hash[
@@ -53,12 +54,12 @@ module TestX86
     Integer(i) & 0xffffffffffffffff
   end
 
-  def self.print_detail(cs, i, mode, stringio)
+  def self.print_detail cs, i, mode, stringio
 
     stringio.puts("\tPrefix:#{i.prefix.to_a.map {|b| "0x%.2x" % b}.join(' ')} ")
 
     if i.segment != REG_INVALID then
-      stringio.puts "\tSegment override: #{i.reg_name(i.segment)}"
+      stringio.puts "\tSegment override: #{cs.reg_name(i.segment)}"
     end
     stringio.puts("\tOpcode:#{i.opcode.to_a.map {|b| "0x%.2x" % b}.join(' ')} ")
     stringio.printf("\top_size: %u, addr_size: %u, disp_size: %u, imm_size: %u\n", i.op_size, i.addr_size, i.disp_size, i.imm_size);
@@ -71,22 +72,22 @@ module TestX86
       unless i.sib_index == REG_INVALID
         stringio.printf(
           "\tsib_index: %s, sib_scale: %u, sib_base: %s\n",
-          i.reg_name(i.sib_index),
+          cs.reg_name(i.sib_index),
           i.sib_scale,
-          i.reg_name(i.sib_base)
+          cs.reg_name(i.sib_base)
         )
       end
     end
 
     if i.reads_reg?( :eax ) || i.reads_reg?( 19 ) || i.reads_reg?( REG_EAX )
-      print '[eax:r]'
+      print '[eax:r] '
       unless i.reads_reg?( :eax ) && i.reads_reg?( 'eax' ) && i.reads_reg?( 19 ) && i.reads_reg?( REG_EAX )
         fail "Error in reg read decomposition"
       end
     end
 
     if i.writes_reg?( 'eax' ) || i.writes_reg?( 19 ) || i.writes_reg?( REG_EAX )
-      print '[eax:w]'
+      print '[eax:w] '
       unless i.writes_reg?( 'eax' ) && i.writes_reg?( 19 ) && i.writes_reg?( REG_EAX )
         fail "Error in reg write decomposition"
       end
@@ -103,7 +104,7 @@ module TestX86
       stringio.puts "\top_count: #{i.op_count}"
       i.operands.each_with_index do |op,c|
         if op.reg?
-          stringio.puts "\t\toperands[#{c}].type: REG = #{i.reg_name(op.value)}"
+          stringio.puts "\t\toperands[#{c}].type: REG = #{cs.reg_name(op.value)}"
         elsif op.imm?
           stringio.puts "\t\toperands[#{c}].type: IMM = 0x#{self.uint64(op.value).to_s(16)}"
         elsif op.fp?
@@ -111,10 +112,10 @@ module TestX86
         elsif op.mem?
           stringio.puts "\t\toperands[#{c}].type: MEM"
           if op.value[:base].nonzero?
-            stringio.puts "\t\t\toperands[#{c}].mem.base: REG = %s" % i.reg_name(op.value[:base])
+            stringio.puts "\t\t\toperands[#{c}].mem.base: REG = %s" % cs.reg_name(op.value[:base])
           end
           if op.value[:index].nonzero?
-            stringio.puts "\t\t\toperands[#{c}].mem.index: REG = %s" % i.reg_name(op.value[:index])
+            stringio.puts "\t\t\toperands[#{c}].mem.index: REG = %s" % cs.reg_name(op.value[:index])
           end
           if op.value[:scale] != 1
             stringio.puts "\t\t\toperands[#{c}].mem.scale: %u" % op.value[:scale]
@@ -133,7 +134,7 @@ module TestX86
   #Test through all modes and architectures
   begin
     cs    = Disassembler.new(0,0)
-    print "x86 Test: Capstone v #{cs.version.join('.')} - "
+    print "X86 Test: Capstone v #{cs.version.join('.')} - "
   ensure
     cs.close
   end
@@ -144,6 +145,9 @@ module TestX86
     ours.puts "Disasm:"
 
     cs    = Disassembler.new(p['arch'], p['mode'])
+    if p['syntax']
+      cs.syntax = p['syntax']
+    end
     res   = cs.disasm(p['code'], 0x1000)
     cache = nil
     res.each do |i|
@@ -162,6 +166,8 @@ module TestX86
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
+    ours.rewind
+    puts ours.read
     puts "#{__FILE__}: FAIL"
   end
 end

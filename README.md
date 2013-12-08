@@ -20,7 +20,7 @@ gem install crabstone-0.0.*.gem
 rake test
 ```
 
-I test with JRuby >= 1.7.5, MRI >= 1.9.3. If it doesn't work with any of those
+I test with JRuby >= 1.7.8, MRI >= 1.9.3. If it doesn't work with any of those
 it's a bug. If it doesn't work with like Rubinius or REE or 1.8 or whatever then
 "patches welcome".
 

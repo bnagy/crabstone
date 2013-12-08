@@ -27,7 +27,7 @@ module TestARM64
     Integer(i) & 0xffffffff
   end
 
-  def self.print_detail(cs, insn, sio)
+  def self.print_detail cs, insn, sio
 
 
     if insn.update_flags
@@ -39,14 +39,14 @@ module TestARM64
     end
 
     if insn.reads_reg?( 'x0' ) || insn.reads_reg?( 197 ) || insn.reads_reg?( REG_X0 )
-      print '[x0:r]'
+      print '[x0:r] '
       unless insn.reads_reg?( 'x0' ) && insn.reads_reg?( 197 ) && insn.reads_reg?( REG_X0 )
         fail "Error in reg read decomposition"
       end
     end
 
     if insn.writes_reg?( 'x0' ) || insn.writes_reg?( 197 ) || insn.writes_reg?( REG_X0 )
-      print '[x0:w]'
+      print '[x0:w] '
       unless insn.writes_reg?( 'x0' ) && insn.writes_reg?( 197 ) && insn.writes_reg?( REG_X0 )
         fail "Error in reg write decomposition"
       end
@@ -57,7 +57,7 @@ module TestARM64
       insn.operands.each_with_index do |op,idx|
         case op[:type]
         when OP_REG
-          sio.puts "\t\toperands[#{idx}].type: REG = #{insn.reg_name(op.value)}"
+          sio.puts "\t\toperands[#{idx}].type: REG = #{cs.reg_name(op.value)}"
         when OP_IMM
           sio.puts "\t\toperands[#{idx}].type: IMM = 0x#{self.uint32(op.value)}"
         when OP_FP
@@ -67,10 +67,10 @@ module TestARM64
         when OP_MEM
           sio.puts "\t\toperands[#{idx}].type: MEM"
           if op.value[:base].nonzero?
-            sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % insn.reg_name(op.value[:base])
+            sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % cs.reg_name(op.value[:base])
           end
           if op.value[:index].nonzero?
-            sio.puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % insn.reg_name(op.value[:index])
+            sio.puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % cs.reg_name(op.value[:index])
           end
           if op.value[:disp].nonzero?
             sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x%x" % (self.uint32(op.value[:disp]))
@@ -91,6 +91,13 @@ module TestARM64
   end
 
   ours = StringIO.new
+
+  begin
+    cs    = Disassembler.new(0,0)
+    print "ARM64 Test: Capstone v #{cs.version.join('.')} - "
+  ensure
+    cs.close
+  end
 
   #Test through all modes and architectures
   @platforms.each do |p|

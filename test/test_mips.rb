@@ -33,22 +33,22 @@ module TestMIPS
     Integer(i) & 0xffffffff
   end
 
-  def self.print_detail(cs, insn, sio)
+  def self.print_detail cs, insn, sio
     if insn.op_count > 0
       if insn.writes_reg? :ra
-        print "[w:ra]"
+        print "[w:ra] "
       end
       sio.puts "\top_count: #{insn.op_count}"
       insn.operands.each_with_index do |op,idx|
         case op[:type]
         when OP_REG
-          sio.puts "\t\toperands[#{idx}].type: REG = #{insn.reg_name(op.value)}"
+          sio.puts "\t\toperands[#{idx}].type: REG = #{cs.reg_name(op.value)}"
         when OP_IMM
           sio.puts "\t\toperands[#{idx}].type: IMM = 0x#{self.uint32(op.value).to_s(16)}"
         when OP_MEM
           sio.puts "\t\toperands[#{idx}].type: MEM"
           if op.value[:base].nonzero?
-            sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % insn.reg_name(op.value[:base])
+            sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % cs.reg_name(op.value[:base])
           end
           if op.value[:disp].nonzero?
             sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x%x" % (self.uint32(op.value[:disp]))
@@ -60,6 +60,13 @@ module TestMIPS
   end
 
   ours = StringIO.new
+
+  begin
+    cs    = Disassembler.new(0,0)
+    print "MIPS Test: Capstone v #{cs.version.join('.')} - "
+  ensure
+    cs.close
+  end
 
   #Test through all modes and architectures
   @platforms.each do |p|
