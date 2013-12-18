@@ -33,9 +33,16 @@ module Crabstone
 
   # Option types and values ( so far ) for cs_option()
   OPT_SYNTAX = 1
+  OPT_DETAIL = 2
+
   SYNTAX = {
     :intel => 1,
     :att   => 2
+  }
+
+  DETAIL = {
+    true  => 4, #trololol
+    false => 0
   }
 
   class ErrArch < StandardError; end
@@ -186,7 +193,7 @@ module Crabstone
 
   class Disassembler
 
-    attr_reader :arch, :mode, :csh, :syntax
+    attr_reader :arch, :mode, :csh, :syntax, :decomposer
 
     def initialize arch, mode
       @arch    = arch
@@ -207,10 +214,15 @@ module Crabstone
 
     def syntax= new_stx
       raise ErrOption, "Unknown Syntax. Try :intel or :att" unless SYNTAX[new_stx]
-      if (res = Binding.cs_option(csh, OPT_SYNTAX, SYNTAX[new_stx])).nonzero?
-        raise ERRNO[res]
-      end
+      res = Binding.cs_option(csh, OPT_SYNTAX, SYNTAX[new_stx])
+      raise ERRNO[res] if res.nonzero?
       @syntax = new_stx
+    end
+
+    def decomposer= new_val
+      res = Binding.cs_option(csh, OPT_DETAIL, DETAIL[!!(new_val)])
+      raise ERRNO[res] if res.nonzero?
+      @decomposer = !!(new_val)
     end
 
     def version
