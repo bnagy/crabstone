@@ -81,7 +81,7 @@ module TestDetail
     ],
     Hash[
       'arch' => ARCH_MIPS,
-      'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
+      'mode' => MODE_64 + MODE_LITTLE_ENDIAN,
       'code' => MIPS_CODE2,
       'comment' => "MIPS-64-EL (Little-endian)"
     ],

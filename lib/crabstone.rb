@@ -24,13 +24,11 @@ module Crabstone
   ARCH_X86   = 3
 
   MODE_LITTLE_ENDIAN = 0
-  MODE_SYNTAX_INTEL  = 0
   MODE_ARM           = 0
   MODE_16            = 1 << 1
   MODE_32            = 1 << 2
   MODE_64            = 1 << 3
   MODE_THUMB         = 1 << 4
-  MODE_SYNTAX_ATT    = 1 << 30
   MODE_BIG_ENDIAN    = 1 << 31
 
   # Option types and values ( so far ) for cs_option()
@@ -191,7 +189,6 @@ module Crabstone
     attr_reader :arch, :mode, :csh, :syntax
 
     def initialize arch, mode
-
       @arch    = arch
       @mode    = mode
       p_size_t = FFI::MemoryPointer.new :ulong_long
