@@ -10,3 +10,5 @@
 * API changes including cs_errno.
 = 0.0.6
 * Final set of API changes before public beta.
+= 1.0.0
+* Move to new github repo

@@ -16,7 +16,7 @@ require_relative 'arch/mips_registers'
 
 module Crabstone
 
-  VERSION = '0.0.6'
+  VERSION = '1.0.0'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1

@@ -4,6 +4,8 @@
 * Rakefile
 * README.md
 
+* examples/hello_world.rb
+
 * lib/arch/arm.rb
 * lib/arch/arm_registers.rb
 * lib/arch/arm64.rb
