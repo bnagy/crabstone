@@ -164,6 +164,8 @@ module TestDetail
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
+    ours.rewind
+    puts ours.read
     puts "#{__FILE__}: FAIL"
   end
 end

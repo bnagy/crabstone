@@ -135,7 +135,7 @@ module Crabstone
         :size, :uint16,
         :bytes, [:uchar, 16],
         :mnemonic, [:char, 32],
-        :op_str, [:char, 136],
+        :op_str, [:char, 160],
         :detail, Detail.ptr
       )
     end
@@ -358,7 +358,7 @@ module Crabstone
       ensure
 
         Binding.cs_free insn_ptr.read_pointer, insn_count
-        
+
       end
 
     end
