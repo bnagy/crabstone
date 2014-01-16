@@ -145,18 +145,18 @@ module TestX86
     ours.puts "Disasm:"
 
     cs    = Disassembler.new(p['arch'], p['mode'])
+    cs.decomposer = true
     if p['syntax']
       cs.syntax = p['syntax']
     end
-    res   = cs.disasm(p['code'], 0x1000)
-    cache = nil
-    res.each do |i|
+    last = 0
+    cs.disasm(p['code'], 0x1000) do |i|
       ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
       self.print_detail(cs, i, cs.mode, ours)
-      cache = i
+      last = i.address + i.size
     end
 
-    ours.printf("0x%x:\n", cache.address + cache.size)
+    ours.printf("0x%x:\n", last)
     ours.puts
     cs.close
   end

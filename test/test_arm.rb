@@ -133,8 +133,9 @@ module TestARM
     ours.puts "Code:#{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
     ours.puts "Disasm:"
     cs = Disassembler.new(p['arch'], p['mode'])
+    cs.decomposer = true
     cache = nil
-    cs.disasm(p['code'], 0x1000).each do |i|
+    cs.disasm(p['code'], 0x1000) do |i|
       ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
       self.print_detail(cs, i, ours)
       cache = i

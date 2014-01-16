@@ -37,7 +37,7 @@ Then (until we publish a gem) clone the repo, then do this:
 
 ```bash
 gem build crabstone.gemspec
-gem install crabstone-1.0.0.gem
+gem install crabstone-2.0.0.gem
 rake test
 ```
 

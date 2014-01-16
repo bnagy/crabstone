@@ -19,6 +19,7 @@ module TestDetail
   MIPS_CODE = "\x0C\x10\x00\x97\x00\x00\x00\x00\x24\x02\x00\x0c\x8f\xa2\x00\x00\x34\x21\x34\x56"
   MIPS_CODE2 = "\x56\x34\x21\x34\xc2\x17\x01\x00"
   ARM64_CODE = "\x21\x7c\x02\x9b\x21\x7c\x00\x53\x00\x40\x21\x4b\xe1\x0b\x40\xb9\x10\x20\x21\x1e"
+  PPC_CODE = "\x80\x20\x00\x00\x80\x3f\x00\x00\x10\x43\x23\x0e\xd0\x44\x00\x80\x4c\x43\x22\x02\x2d\x03\x00\x80\x7c\x43\x20\x14\x7c\x43\x20\x93\x4f\x20\x00\x21\x4c\xc8\x00\x21"
 
 
   include Crabstone
@@ -90,7 +91,13 @@ module TestDetail
       'mode' => 0,
       'code' => ARM64_CODE,
       'comment' => "ARM-64"
-    ]
+    ],
+    Hash[
+      'arch' => ARCH_PPC,
+      'mode' => MODE_BIG_ENDIAN,
+      'code' => PPC_CODE,
+      'comment' => "PPC-64"
+    ],
   ]
 
   def self.print_detail cs, insn, sio
@@ -125,6 +132,7 @@ module TestDetail
     ours.puts "Code: #{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
     ours.puts "Disasm:"
     cs = Disassembler.new(p['arch'], p['mode'])
+    cs.decomposer = true
     if p['syntax']
       cs.syntax = p['syntax']
     end

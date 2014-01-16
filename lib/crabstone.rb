@@ -13,35 +13,43 @@ require_relative 'arch/arm64'
 require_relative 'arch/arm64_registers'
 require_relative 'arch/mips'
 require_relative 'arch/mips_registers'
+require_relative 'arch/ppc'
+require_relative 'arch/ppc_registers'
 
 module Crabstone
 
-  VERSION = '1.0.0'
+  VERSION = '2.0.0'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
   ARCH_MIPS  = 2
   ARCH_X86   = 3
+  ARCH_PPC   = 4
+  ARCH_ALL   = 0xFFFF
 
-  MODE_LITTLE_ENDIAN = 0
-  MODE_ARM           = 0
-  MODE_16            = 1 << 1
-  MODE_32            = 1 << 2
-  MODE_64            = 1 << 3
-  MODE_THUMB         = 1 << 4
-  MODE_BIG_ENDIAN    = 1 << 31
+  MODE_LITTLE_ENDIAN = 0  # little endian mode (default mode)
+  MODE_ARM           = 0  # 32-bit ARM
+  MODE_16            = 1 << 1  # 16-bit mode
+  MODE_32            = 1 << 2  # 32-bit mode
+  MODE_64            = 1 << 3  # 64-bit mode
+  MODE_THUMB         = 1 << 4 # ARM's Thumb mode, including Thumb-2
+  MODE_MICRO         = 1 << 4 # MicroMips mode (MIPS architecture)
+  MODE_N64           = 1 << 5 # Nintendo-64 mode (MIPS architecture)
+  MODE_BIG_ENDIAN    = 1 << 31  # big endian mode
 
   # Option types and values ( so far ) for cs_option()
   OPT_SYNTAX = 1
   OPT_DETAIL = 2
+  OPT_MODE   = 3
 
   SYNTAX = {
     :intel => 1,
-    :att   => 2
+    :att   => 2,
+    :no_regname => 3 # for PPC only
   }
 
   DETAIL = {
-    true  => 4, #trololol
+    true  => 3, #trololol
     false => 0
   }
 
@@ -52,6 +60,8 @@ module Crabstone
   class ErrMode < StandardError; end
   class ErrOK < StandardError; end
   class ErrOption < StandardError; end
+  class ErrDetail < StandardError; end
+  class ErrMemSetup < StandardError; end
 
   ERRNO = {
     0 => ErrOK,
@@ -60,8 +70,19 @@ module Crabstone
     3 => ErrHandle,
     4 => ErrCsh,
     5 => ErrMode,
-    6 => ErrOption
+    6 => ErrOption,
+    7 => ErrDetail,
+    8 => ErrMemSetup
   }
+
+  ERRNO_KLASS = ERRNO.invert
+
+  def self.raise_errno errno
+    err_klass = ERRNO[errno]
+    raise RuntimeError, "Internal Error: Tried to raise unknown errno" unless err_klass
+    err_str = Binding.cs_strerror(errno)
+    raise err_klass, err_str
+  end
 
   module Binding
 
@@ -87,10 +108,23 @@ module Crabstone
 
     class Architecture < FFI::Union
       layout(
-        :x86, X86::Instruction,
-        :arm64, ARM64::Instruction,
         :arm, ARM::Instruction,
-        :mips, MIPS::Instruction
+        :arm64, ARM64::Instruction,
+        :mips, MIPS::Instruction,
+        :x86, X86::Instruction,
+        :ppc, PPC::Instruction
+      )
+    end
+
+    class Detail < FFI::Struct
+      layout(
+        :regs_read, [:uint8, 12],
+        :regs_read_count, :uint8,
+        :regs_write, [:uint8, 20],
+        :regs_write_count, :uint8,
+        :groups, [:uint8, 8],
+        :groups_count, :uint8,
+        :arch, Architecture
       )
     end
 
@@ -101,25 +135,19 @@ module Crabstone
         :size, :uint16,
         :bytes, [:uchar, 16],
         :mnemonic, [:char, 32],
-        :op_str, [:char, 96],
-        :regs_read, [:uint, 32],
-        :regs_read_count, :uint,
-        :regs_write, [:uint, 32],
-        :regs_write_count, :uint,
-        :groups, [:uint, 8],
-        :groups_count, :uint,
-        :arch, Architecture
+        :op_str, [:char, 136],
+        :detail, Detail.ptr
       )
     end
 
     attach_function(
-      :cs_disasm_dyn,
+      :cs_disasm_ex,
       [:csh, :pointer, :size_t, :ulong_long, :size_t, :pointer],
       :size_t
     )
     attach_function :cs_close, [:csh], :cs_err
     attach_function :cs_errno, [:csh], :cs_err
-    attach_function :cs_free, [:pointer], :void
+    attach_function :cs_free, [:pointer, :size_t], :void
     attach_function :cs_insn_group, [:csh, Instruction, :uint], :bool
     attach_function :cs_insn_name, [:csh, :uint], :string
     attach_function :cs_op_count, [:csh, Instruction, :uint], :cs_err
@@ -128,45 +156,92 @@ module Crabstone
     attach_function :cs_reg_name, [:csh, :uint], :string
     attach_function :cs_reg_read, [:csh, Instruction, :uint], :bool
     attach_function :cs_reg_write, [:csh, Instruction, :uint], :bool
-    attach_function :cs_version, [:pointer, :pointer], :void
+    attach_function :cs_version, [:pointer, :pointer], :uint
+    attach_function :cs_support, [:cs_arch], :bool
+    attach_function :cs_strerror, [:cs_err], :string
 
   end # Binding
 
   class Instruction
 
-    attr_reader :arch, :csh, :groups, :raw_insn, :regs_read, :regs_write
-    ARCHS = { arm: ARCH_ARM, arm64: ARCH_ARM64, x86: ARCH_X86, mips: ARCH_MIPS}.invert
-    ARCH_CLASSES = { ARCH_ARM => ARM, ARCH_ARM64 => ARM64, ARCH_X86 => X86, ARCH_MIPS => MIPS}
+    attr_reader :arch, :csh, :raw_insn
+
+    ARCHS = {
+      arm: ARCH_ARM,
+      arm64: ARCH_ARM64,
+      x86: ARCH_X86,
+      mips: ARCH_MIPS,
+      ppc: ARCH_PPC
+    }.invert
+
+    ARCH_CLASSES = {
+      ARCH_ARM => ARM,
+      ARCH_ARM64 => ARM64,
+      ARCH_X86 => X86,
+      ARCH_MIPS => MIPS,
+      ARCH_PPC => PPC,
+    }
 
     def initialize csh, insn, arch
       @arch       = arch
       @csh        = csh
       @raw_insn   = insn
-      @arch_insn  = raw_insn[:arch][ARCHS[arch]]
-      @regs_read  = insn[:regs_read].first insn[:regs_read_count]
-      @regs_write = insn[:regs_write].first insn[:regs_write_count]
-      @groups     = insn[:groups].first insn[:groups_count]
+      if detailed?
+        @detail     = insn[:detail]
+        @arch_insn  = @detail[:arch][ARCHS[arch]]
+        @regs_read  = @detail[:regs_read].first( @detail[:regs_read_count] )
+        @regs_write = @detail[:regs_write].first( @detail[:regs_write_count] )
+        @groups     = @detail[:groups].first( @detail[:groups_count] )
+      end
     end
 
     def name
       name = Binding.cs_insn_name(csh, id)
-      raise ErrCsh unless name
+      Crabstone.raise_errno( ERRNO_KLASS[ErrCsh] ) unless name
       name
     end
 
+    def detailed?
+      not @raw_insn[:detail].pointer.null?
+    end
+
+    def detail
+      raise_unless_detailed
+      @detail
+    end
+
+    def regs_read
+      raise_unless_detailed
+      @regs_read
+    end
+
+    def regs_write
+      raise_unless_detailed
+      @regs_write
+    end
+
+    def groups
+      raise_unless_detailed
+      @groups
+    end
+
     def group? groupid
+      raise_unless_detailed
       Binding.cs_insn_group csh, raw_insn, groupid
     end
 
     def reads_reg? reg
+      raise_unless_detailed
       Binding.cs_reg_read csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
     def writes_reg? reg
+      raise_unless_detailed
       Binding.cs_reg_write csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
     def op_count op_type=nil
+      raise_unless_detailed
       if op_type
         Binding.cs_op_count csh, raw_insn, op_type
       else
@@ -174,11 +249,18 @@ module Crabstone
       end
     end
 
+    # So an Instruction should respond to all the methods in Instruction, and
+    # all the methods in the Arch specific Instruction class. The rest of the
+    # methods are defined explicitly above so that we can raise ErrDetail if
+    # OPT_DETAIL is off.
     def method_missing meth, *args
       if raw_insn.members.include? meth
         # Dispatch to toplevel Instruction class ( this file )
         raw_insn[meth]
       else
+        if not detailed?
+          raise NoMethodError, "Unknown method #{meth} for #{self.class}"
+        end
         # Dispatch to the architecture specific Instruction ( in arch/ )
         if @arch_insn.respond_to? meth
           @arch_insn.send meth, *args
@@ -189,6 +271,13 @@ module Crabstone
         end
       end
     end
+
+    private
+
+    def raise_unless_detailed
+      Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDetail] ) unless detailed?
+    end
+
   end
 
   class Disassembler
@@ -201,27 +290,27 @@ module Crabstone
       p_size_t = FFI::MemoryPointer.new :ulong_long
       p_csh    = FFI::MemoryPointer.new p_size_t
       if ( res = Binding.cs_open( arch, mode, p_csh )).nonzero?
-        raise ERRNO[res]
+        Crabstone.raise_errno res
       end
       @csh = p_csh.read_ulong_long
     end
 
     def close
       if (res = Binding.cs_close(csh) ).nonzero?
-        raise ERRNO[res]
+        Crabstone.raise_errno res
       end
     end
 
     def syntax= new_stx
-      raise ErrOption, "Unknown Syntax. Try :intel or :att" unless SYNTAX[new_stx]
+      Crabstone.raise_errno( ERR_KLASS[ErrOption] ) unless SYNTAX[new_stx]
       res = Binding.cs_option(csh, OPT_SYNTAX, SYNTAX[new_stx])
-      raise ERRNO[res] if res.nonzero?
+      Crabstone.raise_errno res if res.nonzero?
       @syntax = new_stx
     end
 
     def decomposer= new_val
       res = Binding.cs_option(csh, OPT_DETAIL, DETAIL[!!(new_val)])
-      raise ERRNO[res] if res.nonzero?
+      Crabstone.raise_errno res if res.nonzero?
       @decomposer = !!(new_val)
     end
 
@@ -238,7 +327,7 @@ module Crabstone
 
     def reg_name regid
       name = Binding.cs_reg_name(csh, regid)
-      raise ErrCsh unless name
+      Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrCsh] ) unless name
       name
     end
 
@@ -250,8 +339,7 @@ module Crabstone
 
         insn       = Binding::Instruction.new
         insn_ptr   = FFI::MemoryPointer.new insn
-        res        = []
-        insn_count = Binding.cs_disasm_dyn(
+        insn_count = Binding.cs_disasm_ex(
           csh,
           code,
           code.bytesize,
@@ -260,23 +348,19 @@ module Crabstone
           insn_ptr
         )
 
-        raise ERRNO[errno] if insn_count.zero?
+        Crabstone.raise_errno(errno) if insn_count.zero?
 
         (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
-          cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset ).clone
-          this_insn = Instruction.new csh, cs_insn, arch
-          if block_given?
-            yield this_insn
-          else
-            res << this_insn
-          end
+          cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
+          yield Instruction.new csh, cs_insn, arch
         }
 
       ensure
-        Binding.cs_free insn_ptr.read_pointer
+
+        Binding.cs_free insn_ptr.read_pointer, insn_count
+        
       end
 
-      return res unless block_given?
     end
   end
 end

@@ -8,24 +8,18 @@
 require 'crabstone'
 require 'stringio'
 
-module TestMIPS
-  MIPS_CODE = "\x0C\x10\x00\x97\x00\x00\x00\x00\x24\x02\x00\x0c\x8f\xa2\x00\x00\x34\x21\x34\x56"
-  MIPS_CODE2 = "\x56\x34\x21\x34\xc2\x17\x01\x00"
+module TestPPC
+
+  PPC_CODE = "\x80\x20\x00\x00\x80\x3f\x00\x00\x10\x43\x23\x0e\xd0\x44\x00\x80\x4c\x43\x22\x02\x2d\x03\x00\x80\x7c\x43\x20\x14\x7c\x43\x20\x93\x4f\x20\x00\x21\x4c\xc8\x00\x21"
   include Crabstone
-  include Crabstone::MIPS
+  include Crabstone::PPC
 
   @platforms = [
     Hash[
-      'arch' => ARCH_MIPS,
-      'mode' => MODE_32 + MODE_BIG_ENDIAN,
-      'code' => MIPS_CODE,
-      'comment' => "MIPS-32 (Big-endian)"
-    ],
-    Hash[
-      'arch' => ARCH_MIPS,
-      'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
-      'code' => MIPS_CODE2,
-      'comment' => "MIPS-64-EL (Little-endian)"
+      'arch' => ARCH_PPC,
+      'mode' => MODE_BIG_ENDIAN,
+      'code' => PPC_CODE,
+      'comment' => "PPC-64"
     ]
   ]
 
@@ -56,6 +50,15 @@ module TestMIPS
         end
       end
     end
+    if insn.bc.nonzero?
+      sio.puts("\tBranch code: %u" % insn.bc)
+    end
+    if insn.bh.nonzero?
+      sio.puts("\tBranch hint: %u" % insn.bh)
+    end
+    if insn.update_cr0
+      sio.puts("\tUpdate-CR0: True")
+    end
     sio.puts
   end
 
@@ -63,7 +66,7 @@ module TestMIPS
 
   begin
     cs    = Disassembler.new(0,0)
-    print "MIPS Test: Capstone v #{cs.version.join('.')} - "
+    print "PPC Test: Capstone v #{cs.version.join('.')} - "
   ensure
     cs.close
   end
@@ -94,6 +97,8 @@ module TestMIPS
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
+    ours.rewind
+    puts ours.read
     puts "#{__FILE__}: FAIL"
   end
 end

@@ -20,11 +20,12 @@ begin
   puts "Disasm:"
 
   begin
-    cs.disasm(arm, 0x1000).each {|i|
+    cs.decomposer = true
+    cs.disasm(arm, 0x1000) {|i|
       printf("0x%x:\t%s\t\t%s\n",i.address, i.mnemonic, i.op_str)
     }
   rescue
-    fail "Disassembly error: #{$!}"
+    fail "Disassembly error: #{$!} #{$@}"
   ensure
     cs.close
   end

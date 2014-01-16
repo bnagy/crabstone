@@ -90,7 +90,7 @@ module Crabstone
         :update_flags, :bool,
         :writeback, :bool,
         :op_count, :uint8,
-        :operands, [Operand, 20]
+        :operands, [Operand, 36]
       )
 
       def operands

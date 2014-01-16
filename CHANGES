@@ -12,3 +12,8 @@
 * Final set of API changes before public beta.
 = 1.0.0
 * Move to new github repo
+= 2.0.0
+* Add PPC support
+* Assorted API changes
+* disasm can now ONLY be used with a block ( hopefully fix later )
+* THIS IS A BREAKING CHANGE

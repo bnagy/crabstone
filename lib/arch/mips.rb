@@ -688,11 +688,11 @@ module Crabstone
     INS_TGEU        = 441
     INS_TLT         = 442
     INS_TLTI        = 443
-    INS_TLTU        = 444
-    INS_TNE         = 445
-    INS_TNEI        = 446
-    INS_TRUNC       = 447
-    INS_TLTIU       = 448
+    INS_TLTIU       = 444
+    INS_TLTU        = 445
+    INS_TNE         = 446
+    INS_TNEI        = 447
+    INS_TRUNC       = 448
     INS_VSHF        = 449
     INS_WAIT        = 450
     INS_WRDSP       = 451
@@ -700,7 +700,8 @@ module Crabstone
     INS_XOR         = 453
     INS_XORI        = 454
     INS_NOP         = 455
-    INS_MAX         = 456
+    INS_NEGU        = 456
+    INS_MAX         = 457
 
     # Groups
     GRP_INVALID      = 0

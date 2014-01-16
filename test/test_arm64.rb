@@ -107,9 +107,9 @@ module TestARM64
     ours.puts "Disasm:"
 
     cs    = Disassembler.new(p['arch'], p['mode'])
-    res   = cs.disasm(p['code'], 0x2c)
+    cs.decomposer = true
     cache = nil
-    res.each do |i|
+    cs.disasm(p['code'], 0x2c) do |i|
       ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
       self.print_detail(cs, i, ours)
       cache = i

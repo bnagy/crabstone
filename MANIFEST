@@ -14,6 +14,8 @@
 * lib/arch/mips_registers.rb
 * lib/arch/x86.rb
 * lib/arch/x86_registers.rb
+* lib/arch/ppc.rb
+* lib/arch/ppc_registers.rb
 
 * lib/crabstone.rb
 
@@ -29,3 +31,5 @@
 * test/test_mips.rb.SPEC
 * test/test_x86.rb
 * test/test_x86.rb.SPEC
+* test/test_ppc.rb
+* test/test_ppc.rb.SPEC
