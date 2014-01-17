@@ -21,9 +21,22 @@ begin
 
   begin
     cs.decomposer = true
-    cs.disasm(arm, 0x1000) {|i|
+    cs.disasm(arm, 0x1000).each {|i|
       printf("0x%x:\t%s\t\t%s\n",i.address, i.mnemonic, i.op_str)
     }
+    # disasm is a Crabstone::Disassembly object that mixes in Enumerable
+    disasm = cs.disasm(arm, 0x1000)
+    # insns is now an Array of Crabstone::Instructions, with an ObjectSpace
+    # finalizer proc attached to the Array itself. Try not to do this unless
+    # you REALLY REALLY HAVE TO, because there are all kinds of horrible
+    # things that can go wrong, especially if you start keeping refs to any of
+    # the Instructions inside the array.
+    insns = disasm.insns
+    # disasm, on the other hand, is lazy, and doesn't call into C until it has
+    # to. It automatically frees resources. However, it WILL make a new C call
+    # to cs_disasm_ex every time you invoke an Enumerable method like this.
+    puts disasm.map {|i| "0x%x:\t%s\t\t%s\n" % [i.address, i.mnemonic, i.op_str]}
+
   rescue
     fail "Disassembly error: #{$!} #{$@}"
   ensure

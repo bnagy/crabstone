@@ -150,11 +150,11 @@ module TestX86
       cs.syntax = p['syntax']
     end
     last = 0
-    cs.disasm(p['code'], 0x1000) do |i|
+    cs.disasm(p['code'], 0x1000).each {|i|
       ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
       self.print_detail(cs, i, cs.mode, ours)
       last = i.address + i.size
-    end
+    }
 
     ours.printf("0x%x:\n", last)
     ours.puts

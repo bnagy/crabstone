@@ -201,6 +201,7 @@ module Crabstone
       name
     end
 
+    # It's more informative to raise is CS_DETAIL is off than just return nil
     def detailed?
       not @raw_insn[:detail].pointer.null?
     end
@@ -258,8 +259,12 @@ module Crabstone
         # Dispatch to toplevel Instruction class ( this file )
         raw_insn[meth]
       else
+        # Nothing else is available with details.
         if not detailed?
-          raise NoMethodError, "Unknown method #{meth} for #{self.class}"
+          raise(
+            NoMethodError,
+            "Either CS_DETAIL is off, or #{self.class} doesn't implement #{meth}"
+          )
         end
         # Dispatch to the architecture specific Instruction ( in arch/ )
         if @arch_insn.respond_to? meth
@@ -276,6 +281,74 @@ module Crabstone
 
     def raise_unless_detailed
       Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDetail] ) unless detailed?
+    end
+
+  end
+
+  class Disassembly
+
+    include Enumerable
+
+    attr_reader :engine
+
+    def initialize engine, code, offset, count=0
+      @engine = engine
+      @code = code
+      @offset = offset
+      @count = count
+    end
+
+    def each &blk
+      begin
+
+        insn       = Binding::Instruction.new
+        insn_ptr   = FFI::MemoryPointer.new insn
+        insn_count = Binding.cs_disasm_ex(
+          engine.csh,
+          @code,
+          @code.bytesize,
+          @offset,
+          @count,
+          insn_ptr
+        )
+        Crabstone.raise_errno(errno) if insn_count.zero?
+
+        (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
+          cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
+          yield Instruction.new engine.csh, cs_insn, engine.arch
+        }
+
+      ensure
+        Binding.cs_free insn_ptr.read_pointer, insn_count
+      end
+    end
+
+    def insns
+      insn       = Binding::Instruction.new
+      insn_ptr   = FFI::MemoryPointer.new insn
+      insns = []
+      insn_count = Binding.cs_disasm_ex(
+        engine.csh,
+        @code,
+        @code.bytesize,
+        @offset,
+        @count,
+        insn_ptr
+      )
+      Crabstone.raise_errno(errno) if insn_count.zero?
+      cs_resources = [insn_ptr.read_pointer, insn_count]
+
+      (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
+        cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
+        insns << Instruction.new( engine.csh, cs_insn, engine.arch )
+      }
+      # Once insns goes out of scope the underlying C memory will be freed.
+      # HOWEVER, if you're still keeping a ref to any of the Instructions that
+      # were inside that Array, they will still be valid, and will now behave
+      # in an undefined manner, which might include segfaults, missing data,
+      # or all kinds of other troubles.
+      ObjectSpace.define_finalizer(insns) {Binding.cs_free(*cs_resources)}
+      insns
     end
 
   end
@@ -302,7 +375,7 @@ module Crabstone
     end
 
     def syntax= new_stx
-      Crabstone.raise_errno( ERR_KLASS[ErrOption] ) unless SYNTAX[new_stx]
+      Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrOption] ) unless SYNTAX[new_stx]
       res = Binding.cs_option(csh, OPT_SYNTAX, SYNTAX[new_stx])
       Crabstone.raise_errno res if res.nonzero?
       @syntax = new_stx
@@ -334,32 +407,7 @@ module Crabstone
     def disasm code, offset, count=0, &blk
 
       return [] if code.empty?
-
-      begin
-
-        insn       = Binding::Instruction.new
-        insn_ptr   = FFI::MemoryPointer.new insn
-        insn_count = Binding.cs_disasm_ex(
-          csh,
-          code,
-          code.bytesize,
-          offset,
-          count,
-          insn_ptr
-        )
-
-        Crabstone.raise_errno(errno) if insn_count.zero?
-
-        (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
-          cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
-          yield Instruction.new csh, cs_insn, arch
-        }
-
-      ensure
-
-        Binding.cs_free insn_ptr.read_pointer, insn_count
-
-      end
+      Disassembly.new self, code, offset, count
 
     end
   end

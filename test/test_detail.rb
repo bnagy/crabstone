@@ -137,7 +137,7 @@ module TestDetail
       cs.syntax = p['syntax']
     end
     cache = nil
-    cs.disasm(p['code'], 0x1000) do |insn|
+    cs.disasm(p['code'], 0x1000).each {|insn|
       ours.printf(
         "0x%x:\t%s\t\t%s ",
         insn.address,
@@ -153,7 +153,7 @@ module TestDetail
       end
       self.print_detail cs, insn, ours
       cache = insn
-    end
+    }
     ours.printf("0x%x:\n", cache.address + cache.size)
     ours.puts
     cs.close
