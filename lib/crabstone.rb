@@ -18,7 +18,7 @@ require_relative 'arch/ppc_registers'
 
 module Crabstone
 
-  VERSION = '2.0.0'
+  VERSION = '2.0.1'
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1

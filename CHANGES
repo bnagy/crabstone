@@ -17,3 +17,5 @@
 * Assorted API changes
 * disasm can now ONLY be used with a block ( hopefully fix later )
 * THIS IS A BREAKING CHANGE
+= 2.0.1
+* Update X86 constants
