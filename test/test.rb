@@ -113,7 +113,7 @@ module Test
     cs    = Disassembler.new(0,0)
     print "Basic Test: Capstone v #{cs.version.join('.')} - "
   ensure
-    cs.close
+    cs.close rescue nil
   end
 
   #Test through all modes and architectures

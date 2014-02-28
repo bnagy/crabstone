@@ -18,7 +18,11 @@ require_relative 'arch/ppc_registers'
 
 module Crabstone
 
-  VERSION = '2.0.1'
+  VERSION = '2.1.0'
+
+  # Expected C version
+  BINDING_MAJ = 2
+  BINDING_MIN = 1
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -26,6 +30,7 @@ module Crabstone
   ARCH_X86   = 3
   ARCH_PPC   = 4
   ARCH_ALL   = 0xFFFF
+  SUPPORT_DIET = 0x10000
 
   MODE_LITTLE_ENDIAN = 0  # little endian mode (default mode)
   MODE_ARM           = 0  # 32-bit ARM
@@ -62,17 +67,21 @@ module Crabstone
   class ErrOption < StandardError; end
   class ErrDetail < StandardError; end
   class ErrMemSetup < StandardError; end
+  class ErrVersion < StandardError; end
+  class ErrDiet < StandardError; end
 
   ERRNO = {
-    0 => ErrOK,
-    1 => ErrMem,
-    2 => ErrArch,
-    3 => ErrHandle,
-    4 => ErrCsh,
-    5 => ErrMode,
-    6 => ErrOption,
-    7 => ErrDetail,
-    8 => ErrMemSetup
+    0  => ErrOK,
+    1  => ErrMem,
+    2  => ErrArch,
+    3  => ErrHandle,
+    4  => ErrCsh,
+    5  => ErrMode,
+    6  => ErrOption,
+    7  => ErrDetail,
+    8  => ErrMemSetup,
+    9  => ErrVersion,
+    10 => ErrDiet
   }
 
   ERRNO_KLASS = ERRNO.invert
@@ -201,7 +210,7 @@ module Crabstone
       name
     end
 
-    # It's more informative to raise is CS_DETAIL is off than just return nil
+    # It's more informative to raise if CS_DETAIL is off than just return nil
     def detailed?
       not @raw_insn[:detail].pointer.null?
     end
@@ -323,6 +332,7 @@ module Crabstone
       end
     end
 
+    # Use of this method CAN BE LEAKY, please take care.
     def insns
       insn       = Binding::Instruction.new
       insn_ptr   = FFI::MemoryPointer.new insn
@@ -358,6 +368,12 @@ module Crabstone
     attr_reader :arch, :mode, :csh, :syntax, :decomposer
 
     def initialize arch, mode
+
+      maj, min = version
+      if maj != BINDING_MAJ || min != BINDING_MIN
+        raise "FATAL: Binding for #{BINDING_MAJ}.#{BINDING_MIN}, found #{maj}.#{min}"
+      end
+
       @arch    = arch
       @mode    = mode
       p_size_t = FFI::MemoryPointer.new :ulong_long
@@ -365,9 +381,13 @@ module Crabstone
       if ( res = Binding.cs_open( arch, mode, p_csh )).nonzero?
         Crabstone.raise_errno res
       end
+
       @csh = p_csh.read_ulong_long
+
     end
 
+    # After you close the engine, don't use it anymore. Can't believe I even
+    # have to write this.
     def close
       if (res = Binding.cs_close(csh) ).nonzero?
         Crabstone.raise_errno res

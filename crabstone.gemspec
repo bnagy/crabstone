@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'crabstone'
-  spec.version    = '2.0.1'
+  spec.version    = '2.1.0'
   spec.author     = 'Ben Nagy'
   spec.license    = 'BSD'
   spec.email      = 'crabstone@ben.iagu.net'
@@ -19,8 +19,9 @@ Gem::Specification.new do |spec|
   spec.description = <<-EOF
 
   Capstone is a disassembly engine written by Nguyen Anh Quynh, available here
-  https://github.com/aquynh/capstone. This is the Ruby FFI binding. We test against MRI 1.9.3, 2.0.0 and
-  JRuby 1.7.8. AFAIK it works with rubinius 2.2.1.
+  https://github.com/aquynh/capstone. This is the Ruby FFI binding. We test
+  against MRI 2.0.0,  2.1.0 and JRuby 1.7.8. AFAIK it works with rubinius
+  2.2.1.
 
     EOF
 end
