@@ -19,3 +19,6 @@
 * THIS IS A BREAKING CHANGE
 = 2.0.1
 * Update X86 constants
+= 2.1rc1
+* Many constant changes
+* disasm CAN now return an Array, with a slightly scary built-in finalizer

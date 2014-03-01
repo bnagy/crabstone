@@ -154,7 +154,7 @@ module Crabstone
       [:csh, :pointer, :size_t, :ulong_long, :size_t, :pointer],
       :size_t
     )
-    attach_function :cs_close, [:csh], :cs_err
+    attach_function :cs_close, [:pointer], :cs_err
     attach_function :cs_errno, [:csh], :cs_err
     attach_function :cs_free, [:pointer, :size_t], :void
     attach_function :cs_insn_group, [:csh, Instruction, :uint], :bool
@@ -377,19 +377,19 @@ module Crabstone
       @arch    = arch
       @mode    = mode
       p_size_t = FFI::MemoryPointer.new :ulong_long
-      p_csh    = FFI::MemoryPointer.new p_size_t
-      if ( res = Binding.cs_open( arch, mode, p_csh )).nonzero?
+      @p_csh    = FFI::MemoryPointer.new p_size_t
+      if ( res = Binding.cs_open( arch, mode, @p_csh )).nonzero?
         Crabstone.raise_errno res
       end
 
-      @csh = p_csh.read_ulong_long
+      @csh = @p_csh.read_ulong_long
 
     end
 
     # After you close the engine, don't use it anymore. Can't believe I even
     # have to write this.
     def close
-      if (res = Binding.cs_close(csh) ).nonzero?
+      if ( res = Binding.cs_close(@p_csh) ).nonzero?
         Crabstone.raise_errno res
       end
     end
