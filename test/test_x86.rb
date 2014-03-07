@@ -149,14 +149,13 @@ module TestX86
     if p['syntax']
       cs.syntax = p['syntax']
     end
-    last = 0
-    cs.disasm(p['code'], 0x1000).each {|i|
-      ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
-      self.print_detail(cs, i, cs.mode, ours)
-      last = i.address + i.size
+    cache = nil
+    cs.disasm(p['code'], 0x1000).each {|insn|
+      ours.puts "0x#{insn.address.to_s(16)}:\t#{insn.mnemonic}\t#{insn.op_str}"
+      self.print_detail(cs, insn, cs.mode, ours)
+      cache = insn.address + insn.size
     }
-
-    ours.printf("0x%x:\n", last)
+    ours.printf("0x%x:\n", cache)
     ours.puts
     cs.close
   end

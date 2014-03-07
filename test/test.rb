@@ -128,12 +128,12 @@ module Test
       cs.syntax = p['syntax']
     end
     cache = nil
-    cs.disasm(p['code'], 0x1000).each {|i|
-      ours.printf("0x%x:\t%s\t\t%s\n",i.address, i.mnemonic, i.op_str)
-      cache = i
+    cs.disasm(p['code'], 0x1000).each {|insn|
+      ours.printf("0x%x:\t%s\t\t%s\n",insn.address, insn.mnemonic, insn.op_str)
+      cache = insn.address + insn.size
     }
+    ours.printf("0x%x:\n", cache)
     cs.close
-    ours.printf("0x%x:\n", cache.address + cache.size);
     ours.puts
   end
 

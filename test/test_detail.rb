@@ -152,9 +152,9 @@ module TestDetail
         )
       end
       self.print_detail cs, insn, ours
-      cache = insn
+      cache = insn.address + insn.size
     }
-    ours.printf("0x%x:\n", cache.address + cache.size)
+    ours.printf("0x%x:\n", cache)
     ours.puts
     cs.close
   end

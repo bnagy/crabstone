@@ -135,12 +135,12 @@ module TestARM
     cs = Disassembler.new(p['arch'], p['mode'])
     cs.decomposer = true
     cache = nil
-    cs.disasm(p['code'], 0x1000).each {|i|
-      ours.puts "0x#{i.address.to_s(16)}:\t#{i.mnemonic}\t#{i.op_str}"
-      self.print_detail(cs, i, ours)
-      cache = i
+    cs.disasm(p['code'], 0x1000).each {|insn|
+      ours.puts "0x#{insn.address.to_s(16)}:\t#{insn.mnemonic}\t#{insn.op_str}"
+      self.print_detail(cs, insn, ours)
+      cache = insn.address + insn.size
     }
-    ours.printf("0x%x:\n", cache.address + cache.size)
+    ours.printf("0x%x:\n", cache)
     ours.puts
 
     cs.close
