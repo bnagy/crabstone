@@ -174,6 +174,11 @@ module Crabstone
   # This is a C engine build option, so we can set it here, not when we
   # instantiate a new Disassembler.
   DIET_MODE = Binding.cs_support SUPPORT_DIET
+  # Diet mode means:
+  # - No op_str or mnemonic in Instruction
+  # - No regs_read, regs_write or groups ( even with detail on )
+  # - No reg_name or insn_name id2str convenience functions
+  # - detail mode CAN still be on - so the arch insn operands MAY be available
 
   class Instruction
 
@@ -280,9 +285,9 @@ module Crabstone
     end
 
     # So an Instruction should respond to all the methods in Instruction, and
-    # all the methods in the Arch specific Instruction class. The rest of the
-    # methods are defined explicitly above so that we can raise ErrDetail if
-    # OPT_DETAIL is off.
+    # all the methods in the Arch specific Instruction class. The methods /
+    # members that have special handling for detail mode or diet mode are
+    # handled above. The rest is dynamically dispatched below.
     def method_missing meth, *args
       if raw_insn.members.include? meth
         # Dispatch to toplevel Instruction class ( this file )
@@ -447,6 +452,7 @@ module Crabstone
     end
 
     def reg_name regid
+      Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDiet] ) if DIET_MODE
       name = Binding.cs_reg_name(csh, regid)
       Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrCsh] ) unless name
       name
@@ -458,5 +464,6 @@ module Crabstone
       Disassembly.new self, code, offset, count
 
     end
+
   end
 end
