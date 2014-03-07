@@ -150,12 +150,17 @@ module TestX86
       cs.syntax = p['syntax']
     end
     cache = nil
-    cs.disasm(p['code'], 0x1000).each {|insn|
+
+    # This form is NOT RECOMMENDED in real code except as a last resort - use
+    # the block form if possible.
+    insns = cs.disasm(p['code'], 0x1000)
+
+    insns.each {|insn|
       ours.puts "0x#{insn.address.to_s(16)}:\t#{insn.mnemonic}\t#{insn.op_str}"
       self.print_detail(cs, insn, cs.mode, ours)
-      cache = insn.address + insn.size
+      cache = insn
     }
-    ours.printf("0x%x:\n", cache)
+    ours.printf("0x%x:\n", cache.address + cache.size)
     ours.puts
     cs.close
   end
