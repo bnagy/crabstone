@@ -1,6 +1,9 @@
 crabstone
 ====
 
+Current Stable: 2.1
+----
+
 ( FROM THE CAPSTONE README )
 
 Capstone is a disassembly framework with the target of becoming the ultimate

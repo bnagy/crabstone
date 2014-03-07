@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
 
   spec.extra_rdoc_files = ['CHANGES', 'README.md', 'MANIFEST']
 
-  spec.add_dependency('ffi')
-  spec.add_development_dependency('test-unit')
+  spec.add_runtime_dependency 'ffi'
+  spec.add_development_dependency 'test-unit'
 
   spec.description = <<-EOF
 

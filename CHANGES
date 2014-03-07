@@ -22,3 +22,7 @@
 = 2.1rc1
 * Many constant changes
 * disasm CAN now return an Array, with a slightly scary built-in finalizer
+= 2.1.0
+* Full compliance with 2.1 API
+* Better error handling for diet mode
+* Internally change cs_close() signature, so closed handles can't be used
