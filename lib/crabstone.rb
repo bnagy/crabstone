@@ -315,7 +315,7 @@ module Crabstone
     def raise_if_diet
       Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDiet] ) if DIET_MODE
     end
-    
+
   end
 
   class Disassembly
@@ -436,6 +436,10 @@ module Crabstone
       min = FFI::MemoryPointer.new(:int)
       Binding.cs_version maj, min
       [ maj.read_int, min.read_int ]
+    end
+
+    def diet?
+      DIET_MODE
     end
 
     def errno
