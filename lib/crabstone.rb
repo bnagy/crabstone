@@ -171,6 +171,10 @@ module Crabstone
 
   end # Binding
 
+  # This is a C engine build option, so we can set it here, not when we
+  # instantiate a new Disassembler.
+  DIET_MODE = Binding.cs_support SUPPORT_DIET
+
   class Instruction
 
     attr_reader :arch, :csh, :raw_insn
@@ -222,32 +226,48 @@ module Crabstone
 
     def regs_read
       raise_unless_detailed
+      raise_if_diet
       @regs_read
     end
 
     def regs_write
       raise_unless_detailed
+      raise_if_diet
       @regs_write
     end
 
     def groups
       raise_unless_detailed
+      raise_if_diet
       @groups
     end
 
     def group? groupid
       raise_unless_detailed
+      raise_if_diet
       Binding.cs_insn_group csh, raw_insn, groupid
     end
 
     def reads_reg? reg
       raise_unless_detailed
+      raise_if_diet
       Binding.cs_reg_read csh, raw_insn, ARCH_CLASSES[arch].register( reg )
     end
 
     def writes_reg? reg
       raise_unless_detailed
+      raise_if_diet
       Binding.cs_reg_write csh, raw_insn, ARCH_CLASSES[arch].register( reg )
+    end
+
+    def mnemonic
+      raise_if_diet
+      raw_insn[:mnemonic]
+    end
+
+    def op_str
+      raise_if_diet
+      raw_insn[:op_str]
     end
 
     def op_count op_type=nil
@@ -292,6 +312,10 @@ module Crabstone
       Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDetail] ) unless detailed?
     end
 
+    def raise_if_diet
+      Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDiet] ) if DIET_MODE
+    end
+    
   end
 
   class Disassembly

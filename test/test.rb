@@ -111,6 +111,7 @@ module Test
 
   begin
     cs    = Disassembler.new(0,0)
+    puts "Capstone Diet Mode: #{DIET_MODE}"
     print "Basic Test: Capstone v #{cs.version.join('.')} - "
   ensure
     cs.close rescue nil
