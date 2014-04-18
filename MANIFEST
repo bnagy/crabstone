@@ -16,6 +16,10 @@
 * lib/arch/x86_registers.rb
 * lib/arch/ppc.rb
 * lib/arch/ppc_registers.rb
+* lib/arch/sparc.rb
+* lib/arch/sparc_registers.rb
+* lib/arch/sysz.rb
+* lib/arch/sysz_registers.rb
 
 * lib/crabstone.rb
 
@@ -33,3 +37,7 @@
 * test/test_x86.rb.SPEC
 * test/test_ppc.rb
 * test/test_ppc.rb.SPEC
+* test/test_sparc.rb
+* test/test_sparc.rb.SPEC
+* test/test_sysz.rb
+* test/test_sysz.rb.SPEC

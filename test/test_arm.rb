@@ -41,7 +41,8 @@ module TestARM
       'arch' => ARCH_ARM,
       'mode' => MODE_THUMB,
       'code' => THUMB_CODE2,
-      'comment' => "Thumb-2"
+      'comment' => "Thumb-2 & register named with numbers",
+      'syntax' => :no_regname
     ],
   ]
 
@@ -133,6 +134,11 @@ module TestARM
     ours.puts "Code:#{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
     ours.puts "Disasm:"
     cs = Disassembler.new(p['arch'], p['mode'])
+    
+    if p['syntax']
+      cs.syntax = p['syntax']
+    end
+    
     cs.decomposer = true
     cache = nil
     cs.disasm(p['code'], 0x1000).each {|insn|

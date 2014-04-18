@@ -1,7 +1,7 @@
 crabstone
 ====
 
-Current Stable: 2.1
+Current Stable: 2.2
 ----
 
 ( FROM THE CAPSTONE README )
@@ -12,7 +12,7 @@ disasm engine for binary analysis and reversing in the security community.
 Created by Nguyen Anh Quynh, then developed and maintained by a small community,
 Capstone offers some unparalleled features:
 
-- Support multiple hardware architectures: ARM, ARM64 (aka ARMv8), Mips & X86.
+- Support multiple hardware architectures: ARM, ARM64 (aka ARMv8), Mips, X86, Sparc & SystemZ.
 
 - Having clean/simple/lightweight/intuitive architecture-neutral API.
 
@@ -40,7 +40,7 @@ Then (until we publish a gem) clone the repo, then do this:
 
 ```bash
 gem build crabstone.gemspec
-gem install crabstone-2.1.0.gem
+gem install crabstone-2.2.0.gem
 rake test
 ```
 

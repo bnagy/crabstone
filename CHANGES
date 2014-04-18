@@ -26,3 +26,5 @@
 * Full compliance with 2.1 API
 * Better error handling for diet mode
 * Internally change cs_close() signature, so closed handles can't be used
+= 2.2.0
+* Add support for Sparc and SystemZ

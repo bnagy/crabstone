@@ -15,37 +15,48 @@ require_relative 'arch/mips'
 require_relative 'arch/mips_registers'
 require_relative 'arch/ppc'
 require_relative 'arch/ppc_registers'
+require_relative 'arch/sparc'
+require_relative 'arch/sparc_registers'
+require_relative 'arch/systemz'
+require_relative 'arch/systemz_registers'
 
 module Crabstone
 
-  VERSION = '2.1.0'
+  VERSION = '2.2.0'
 
   # Expected C version
   BINDING_MAJ = 2
-  BINDING_MIN = 1
+  BINDING_MIN = 2
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
   ARCH_MIPS  = 2
   ARCH_X86   = 3
   ARCH_PPC   = 4
+  ARCH_SPARC = 5
+  ARCH_SYSZ  = 6
+  ARCH_MAX   = 7
   ARCH_ALL   = 0xFFFF
-  SUPPORT_DIET = 0x10000
 
-  MODE_LITTLE_ENDIAN = 0  # little endian mode (default mode)
-  MODE_ARM           = 0  # 32-bit ARM
-  MODE_16            = 1 << 1  # 16-bit mode
-  MODE_32            = 1 << 2  # 32-bit mode
-  MODE_64            = 1 << 3  # 64-bit mode
-  MODE_THUMB         = 1 << 4 # ARM's Thumb mode, including Thumb-2
-  MODE_MICRO         = 1 << 4 # MicroMips mode (MIPS architecture)
-  MODE_N64           = 1 << 5 # Nintendo-64 mode (MIPS architecture)
-  MODE_BIG_ENDIAN    = 1 << 31  # big endian mode
+  MODE_LITTLE_ENDIAN = 0         # little-endian mode (default mode)
+  MODE_ARM           = 0         # ARM mode
+  MODE_16            = (1 << 1)  # 16-bit mode (for X86, Mips)
+  MODE_32            = (1 << 2)  # 32-bit mode (for X86, Mips)
+  MODE_64            = (1 << 3)  # 64-bit mode (for X86, Mips)
+  MODE_THUMB         = (1 << 4)  # ARM's Thumb mode, including Thumb-2
+  MODE_MICRO         = (1 << 4)  # MicroMips mode (MIPS architecture)
+  MODE_N64           = (1 << 5)  # Nintendo-64 mode (MIPS architecture)
+  MODE_V9            = (1 << 4)  # Nintendo-64 mode (MIPS architecture)
+  MODE_BIG_ENDIAN    = (1 << 31) # big-endian mode
 
   # Option types and values ( so far ) for cs_option()
   OPT_SYNTAX = 1
   OPT_DETAIL = 2
   OPT_MODE   = 3
+
+  # Query values for cs_support()
+  SUPPORT_DIET       = ARCH_ALL + 1
+  SUPPORT_X86_REDUCE = ARCH_ALL + 2
 
   SYNTAX = {
     :intel => 1,
@@ -121,7 +132,9 @@ module Crabstone
         :arm64, ARM64::Instruction,
         :mips, MIPS::Instruction,
         :x86, X86::Instruction,
-        :ppc, PPC::Instruction
+        :ppc, PPC::Instruction,
+        :sparc, Sparc::Instruction,
+        :sysz, SysZ::Instruction
       )
     end
 
@@ -189,7 +202,9 @@ module Crabstone
       arm64: ARCH_ARM64,
       x86: ARCH_X86,
       mips: ARCH_MIPS,
-      ppc: ARCH_PPC
+      ppc: ARCH_PPC,
+      sparc: ARCH_SPARC,
+      sysz: ARCH_SYSZ
     }.invert
 
     ARCH_CLASSES = {
@@ -198,6 +213,8 @@ module Crabstone
       ARCH_X86 => X86,
       ARCH_MIPS => MIPS,
       ARCH_PPC => PPC,
+      ARCH_SPARC => Sparc,
+      ARCH_SYSZ => SysZ
     }
 
     def initialize csh, insn, arch
