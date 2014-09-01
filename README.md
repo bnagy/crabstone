@@ -1,6 +1,14 @@
 crabstone
 ====
 
+NOTICE
+===
+
+Imagine one of those under construction gifs here.
+
+Upstream will be merging 3.0 before mid-Sept 2014, at which point 2.2 will cease to exist, so there will be nothing to build against to use this binding branch. I'm therefore upgrading BOTH master and next to upstream 3.0 as soon as possible. For now, this is probably broken, and new installs should wait. Sorry.
+
+
 Current Stable: 2.2
 ----
 
