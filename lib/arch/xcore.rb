@@ -5,10 +5,10 @@
 
 require 'ffi'
 
-require_relative 'sysz_const'
+require_relative 'xcore_const'
 
 module Crabstone
-    module SysZ
+    module XCore
 
         class MemoryOperand < FFI::Struct
             layout(

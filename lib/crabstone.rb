@@ -19,14 +19,16 @@ require_relative 'arch/sparc'
 require_relative 'arch/sparc_registers'
 require_relative 'arch/systemz'
 require_relative 'arch/systemz_registers'
+require_relative 'arch/xcore'
+require_relative 'arch/xcore_registers'
 
 module Crabstone
 
   VERSION = '2.2.0'
 
   # Expected C version
-  BINDING_MAJ = 2
-  BINDING_MIN = 2
+  BINDING_MAJ = 3
+  BINDING_MIN = 0
 
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
@@ -35,36 +37,50 @@ module Crabstone
   ARCH_PPC   = 4
   ARCH_SPARC = 5
   ARCH_SYSZ  = 6
-  ARCH_MAX   = 7
+  ARCH_XCORE = 7
+  ARCH_MAX   = 8
   ARCH_ALL   = 0xFFFF
 
-  MODE_LITTLE_ENDIAN = 0         # little-endian mode (default mode)
-  MODE_ARM           = 0         # ARM mode
-  MODE_16            = (1 << 1)  # 16-bit mode (for X86, Mips)
-  MODE_32            = (1 << 2)  # 32-bit mode (for X86, Mips)
-  MODE_64            = (1 << 3)  # 64-bit mode (for X86, Mips)
-  MODE_THUMB         = (1 << 4)  # ARM's Thumb mode, including Thumb-2
-  MODE_MICRO         = (1 << 4)  # MicroMips mode (MIPS architecture)
-  MODE_N64           = (1 << 5)  # Nintendo-64 mode (MIPS architecture)
-  MODE_V9            = (1 << 4)  # Nintendo-64 mode (MIPS architecture)
-  MODE_BIG_ENDIAN    = (1 << 31) # big-endian mode
+  MODE_LITTLE_ENDIAN = 0       # little endian mode (default mode)
+  MODE_ARM           = 0       # 32-bit ARM
+  MODE_16            = 1 << 1  # 16-bit mode
+  MODE_32            = 1 << 2  # 32-bit mode
+  MODE_64            = 1 << 3  # 64-bit mode
+  MODE_THUMB         = 1 << 4  # ARM's Thumb mode including Thumb-2
+  MODE_MCLASS        = 1 << 5  # ARM's Cortex-M series
+  MODE_MICRO         = 1 << 4  # MicroMips mode (MIPS architecture)
+  MODE_N64           = 1 << 5  # Nintendo-64 mode (MIPS architecture)
+  MODE_MIPS3         = 1 << 6  # Mips III ISA
+  MODE_MIPS32R6      = 1 << 7  # Mips32r6 ISA
+  MODE_MIPSGP64      = 1 << 8  # General Purpose Registers are 64-bit wide (MIPS arch)
+  MODE_V9            = 1 << 4  # SparcV9 mode (Sparc architecture)
+  MODE_BIG_ENDIAN    = 1 << 31 # big endian mode
 
   # Option types and values ( so far ) for cs_option()
-  OPT_SYNTAX = 1
-  OPT_DETAIL = 2
-  OPT_MODE   = 3
+  OPT_SYNTAX         = 1  # Asssembly output syntax
+  OPT_DETAIL         = 2  # Break down instruction structure into details
+  OPT_MODE           = 3  # Change engine's mode at run-time
+  OPT_MEM            = 4  # User-defined dynamic memory related functions
+  OPT_SKIPDATA       = 5  # Skip data when disassembling. Then engine is in SKIPDATA mode.
+  OPT_SKIPDATA_SETUP = 6  # Setup user-defined function for SKIPDATA option
+
 
   # Query values for cs_support()
   SUPPORT_DIET       = ARCH_ALL + 1
   SUPPORT_X86_REDUCE = ARCH_ALL + 2
 
   SYNTAX = {
-    :intel => 1,
-    :att   => 2,
+    :intel      => 1,
+    :att        => 2,
     :no_regname => 3 # for PPC only
   }
 
   DETAIL = {
+    true  => 3, #trololol
+    false => 0
+  }
+
+  SKIPDATA = {
     true  => 3, #trololol
     false => 0
   }
@@ -80,6 +96,9 @@ module Crabstone
   class ErrMemSetup < StandardError; end
   class ErrVersion < StandardError; end
   class ErrDiet < StandardError; end
+  class ErrSkipData < StandardError; end  
+  class ErrX86ATT < StandardError; end  
+  class ErrX86Intel < StandardError; end
 
   ERRNO = {
     0  => ErrOK,
@@ -92,7 +111,10 @@ module Crabstone
     7  => ErrDetail,
     8  => ErrMemSetup,
     9  => ErrVersion,
-    10 => ErrDiet
+    10 => ErrDiet,
+    11 => ErrSkipData,
+    12 => ErrX86ATT,
+    13 => ErrX86Intel,
   }
 
   ERRNO_KLASS = ERRNO.invert
@@ -204,17 +226,19 @@ module Crabstone
       mips: ARCH_MIPS,
       ppc: ARCH_PPC,
       sparc: ARCH_SPARC,
-      sysz: ARCH_SYSZ
+      sysz: ARCH_SYSZ,
+      xcore: ARCH_XCORE
     }.invert
 
     ARCH_CLASSES = {
-      ARCH_ARM => ARM,
+      ARCH_ARM   => ARM,
       ARCH_ARM64 => ARM64,
-      ARCH_X86 => X86,
-      ARCH_MIPS => MIPS,
-      ARCH_PPC => PPC,
+      ARCH_X86   => X86,
+      ARCH_MIPS  => MIPS,
+      ARCH_PPC   => PPC,
       ARCH_SPARC => Sparc,
-      ARCH_SYSZ => SysZ
+      ARCH_SYSZ  => SysZ,
+      ARCH_XCORE => XCore
     }
 
     def initialize csh, insn, arch

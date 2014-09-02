@@ -16,41 +16,47 @@ module Test
   # from the Go binding. It's just a very quick check to catch developer
   # error.
   # TODO: Work out why I can't get the C constants with ffi/tools/const_generator
+
   @checks = {
     Crabstone::ARM64 => Hash[
-      :reg_max => 226,
-      :ins_max => 446,
-      :grp_max => 5,
+      reg_max: 260,
+      ins_max: 452,
+      grp_max: 6
     ],
     Crabstone::ARM => Hash[
-      :reg_max => 111,
-      :ins_max => 422,
-      :grp_max => 33,
+      reg_max: 111,
+      ins_max: 435,
+      grp_max: 33
     ],
     Crabstone::MIPS => Hash[
-      :reg_max => 123,
-      :ins_max => 456,
-      :grp_max => 20,
+      reg_max: 129,
+      ins_max: 350,
+      grp_max: 35
     ],
     Crabstone::PPC => Hash[
-      :reg_max => 137,
-      :ins_max => 436,
-      :grp_max => 7,
+      reg_max: 178,
+      ins_max: 769,
+      grp_max: 12
     ],
     Crabstone::SysZ => Hash[
-      :reg_max => 35,
-      :ins_max => 679,
-      :grp_max => 7,
+      reg_max: 35,
+      ins_max: 682,
+      grp_max: 7
     ],
     Crabstone::Sparc => Hash[
-      :reg_max => 87,
-      :ins_max => 279,
-      :grp_max => 9,
+      reg_max: 87,
+      ins_max: 277,
+      grp_max: 9
     ],
     Crabstone::X86 => Hash[
-      :reg_max => 233,
-      :ins_max => 1258,
-      :grp_max => 35,
+      reg_max: 234,
+      ins_max: 1298,
+      grp_max: 47
+    ],
+    Crabstone::XCore => Hash[
+      reg_max: 26,
+      ins_max: 121,
+      grp_max: 2
     ],
   }
 
@@ -67,6 +73,9 @@ module Test
         klass::INS_MAX != checklist[:ins_max] ||
         klass::GRP_MAX != checklist[:grp_max]
       puts "\t#{__FILE__}: #{klass}: FAIL"
+      p klass::REG_MAX
+            p klass::GRP_MAX
+                  p klass::INS_MAX
     else
       puts "\t#{__FILE__}: #{klass}: PASS"
     end

@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+# I hate these little scripts :(
+
+unless ARGV.length == 1
+	fail "Usage: #{$0} path/to/capstone/python/capstone"
+end
+
+pyfiles = Dir.glob(File.join(ARGV[0], "*_const.py"))
+if pyfiles.empty?
+	fail "No *_const.py files found in #{ARGV[0]}"
+end
+
+pyfiles.each {|fn|
+
+	mod = File.basename(fn).split('_').first.upcase
+	python = File.read fn
+	rbfn = "#{mod.downcase}_const.rb"
+
+	# Fixup the odd module names
+	mod = case mod
+	when 'SYSZ'
+		'SysZ'
+	when 'XCORE'
+		'XCore'
+	when 'SPARC'
+		'Sparc'
+	else
+		mod
+	end
+
+	puts "Writing #{mod}"
+
+	prefix = <<END
+# Library by Nguyen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# (c) 2013 COSEINC. All Rights Reserved.
+
+# THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
+# Command: #{$0} #{ARGV[0]}
+
+module Crabstone
+  module #{mod}
+
+END
+
+	postfix = <<END
+  end
+end
+END
+
+	lines = python.lines[2..-1].map {|l| 
+		l.gsub(/#{mod.upcase}_/, '').sub(%q(//), ' # ')
+	}
+
+	File.open(rbfn, 'w+') {|fh|
+		fh.write prefix
+		lines.each {|l| fh.write "    #{l}"}
+		fh.write postfix
+	}
+
+}
