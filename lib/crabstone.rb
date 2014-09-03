@@ -156,7 +156,8 @@ module Crabstone
         :x86, X86::Instruction,
         :ppc, PPC::Instruction,
         :sparc, Sparc::Instruction,
-        :sysz, SysZ::Instruction
+        :sysz, SysZ::Instruction,
+        :xcore, XCore::Instruction
       )
     end
 
@@ -185,7 +186,7 @@ module Crabstone
     end
 
     attach_function(
-      :cs_disasm_ex,
+      :cs_disasm,
       [:csh, :pointer, :size_t, :ulong_long, :size_t, :pointer],
       :size_t
     )
@@ -382,7 +383,7 @@ module Crabstone
 
         insn       = Binding::Instruction.new
         insn_ptr   = FFI::MemoryPointer.new insn
-        insn_count = Binding.cs_disasm_ex(
+        insn_count = Binding.cs_disasm(
           engine.csh,
           @code,
           @code.bytesize,
@@ -396,9 +397,9 @@ module Crabstone
           cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
           yield Instruction.new engine.csh, cs_insn, engine.arch
         }
-
       ensure
-        Binding.cs_free insn_ptr.read_pointer, insn_count
+        first_insn = insn_ptr.read_pointer
+        Binding.cs_free first_insn, insn_count unless first_insn.null?
       end
     end
 
@@ -407,7 +408,7 @@ module Crabstone
       insn       = Binding::Instruction.new
       insn_ptr   = FFI::MemoryPointer.new insn
       insns = []
-      insn_count = Binding.cs_disasm_ex(
+      insn_count = Binding.cs_disasm(
         engine.csh,
         @code,
         @code.bytesize,
