@@ -111,8 +111,7 @@ module Crabstone
           'S28' => 107,
           'S29' => 108,
           'S30' => 109,
-          'S31' => 110,
-          'MAX' => 111
+          'S31' => 110
     }
 
     # alias registers

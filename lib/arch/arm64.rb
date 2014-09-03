@@ -31,13 +31,20 @@ module Crabstone
                 :reg, :uint,
                 :imm, :int32,
                 :fp, :double,
-                :mem, MemoryOperand
+                :mem, MemoryOperand,
+                :pstate, :uint,
+                :sys, :uint,
+                :prefetch, :uint,
+                :barrier, :uint
             )
         end
 
         class Operand < FFI::Struct
 
             layout(
+                :vector_index, :int,
+                :vas, :uint,
+                :vess, :uint,
                 :shift, OperandShift,
                 :ext, :uint,
                 :type, :uint,
@@ -46,14 +53,22 @@ module Crabstone
 
             def value
                 case self[:type]
-                when OP_REG
+                when *[OP_REG, OP_REG_MRS, OP_REG_MSR]   # Register operand.
                     self[:value][:reg]
-                when OP_IMM
+                when *[OP_IMM, OP_CIMM]   # Immediate operand.
                     self[:value][:imm]
-                when OP_MEM
-                    self[:value][:mem]
-                when OP_FP
+                when OP_FP   # Floating-Point immediate operand.
                     self[:value][:fp]
+                when OP_MEM   # Memory operand
+                    self[:value][:mem]
+                when OP_PSTATE # PState operand.
+                    self[:value][:pstate]
+                when OP_SYS # SYS operand for IC/DC/AT/TLBI instructions.
+                    self[:value][:sys]
+                when OP_PREFETCH # Prefetch operand (PRFM).
+                    self[:value][:prefetch]
+                when OP_BARRIER # Memory barrier operand (ISB/DMB/DSB instructions).
+                    self[:value][:barrier]
                 else
                     nil
                 end
@@ -95,8 +110,41 @@ module Crabstone
                 self[:type] == OP_FP
             end
 
+            def pstate?
+                self[:type] == OP_PSTATE
+            end
+
+            def msr?
+                self[:type] == OP_REG_MSR
+            end
+
+            def mrs?
+                self[:type] == OP_REG_MRS
+            end
+
+            def barrier?
+                self[:type] == OP_BARRIER
+            end
+
+            def prefetch?
+                self[:type] == OP_PREFETCH
+            end
+
             def valid?
-                [OP_MEM, OP_IMM, OP_CIMM, OP_FP, OP_REG].include? self[:type]
+                [
+                    OP_INVALID,
+                    OP_REG,
+                    OP_CIMM,
+                    OP_IMM,
+                    OP_FP,
+                    OP_MEM,
+                    OP_REG_MRS,
+                    OP_REG_MSR,
+                    OP_PSTATE,
+                    OP_SYS,
+                    OP_PREFETCH,
+                    OP_BARRIER
+                ].include? self[:type]
             end
 
         end
@@ -104,8 +152,8 @@ module Crabstone
         class Instruction < FFI::Struct
             layout(
                 :cc, :uint,
-                :writeback, :bool,
                 :update_flags, :bool,
+                :writeback, :bool,
                 :op_count, :uint8,
                 :operands, [Operand, 8]
             )

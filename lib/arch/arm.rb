@@ -32,7 +32,7 @@ module Crabstone
         :imm, :int32,
         :fp, :double,
         :mem, MemoryOperand,
-        :setend, :int
+        :setend, :uint
       )
     end
 
@@ -107,9 +107,9 @@ module Crabstone
       layout(
         :usermode, :bool,
         :vector_size, :int,
-        :vector_data, :int,
-        :cps_mode, :int,
-        :cps_flag, :int,
+        :vector_data, :uint,
+        :cps_mode, :uint,
+        :cps_flag, :uint,
         :cc, :uint,
         :update_flags, :bool,
         :writeback, :bool,
