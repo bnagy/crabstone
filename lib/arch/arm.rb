@@ -29,14 +29,16 @@ module Crabstone
     class OperandValue < FFI::Union
       layout(
         :reg, :uint,
-        :imm, :uint,
+        :imm, :int32,
         :fp, :double,
-        :mem, MemoryOperand
+        :mem, MemoryOperand,
+        :setend, :int
       )
     end
 
     class Operand < FFI::Struct
       layout(
+        :vector_index, :int,
         :shift, OperandShift,
         :type, :uint,
         :value, OperandValue
@@ -44,7 +46,7 @@ module Crabstone
 
       def value
         case self[:type]
-        when OP_REG
+        when *[OP_REG, OP_SYSREG]
           self[:value][:reg]
         when OP_IMM
           self[:value][:imm]
@@ -52,6 +54,8 @@ module Crabstone
           self[:value][:mem]
         when OP_FP
           self[:value][:fp]
+        when OP_SETEND
+          self[:value][:setend]
         else
           nil
         end
@@ -81,13 +85,31 @@ module Crabstone
         self[:type] == OP_FP
       end
 
+      def sysreg?
+        self[:type] == OP_SYSREG
+      end
+
       def valid?
-        [OP_MEM, OP_IMM, OP_CIMM, OP_PIMM, OP_FP, OP_REG].include? self[:type]
+        [
+          OP_MEM,
+          OP_IMM,
+          OP_CIMM,
+          OP_PIMM,
+          OP_FP,
+          OP_REG,
+          OP_SYSREG,
+          OP_SETEND
+        ].include? self[:type]
       end
     end
 
     class Instruction < FFI::Struct
       layout(
+        :usermode, :bool,
+        :vector_size, :int,
+        :vector_data, :int,
+        :cps_mode, :int,
+        :cps_flag, :int,
         :cc, :uint,
         :update_flags, :bool,
         :writeback, :bool,
