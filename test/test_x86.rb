@@ -11,9 +11,10 @@ require 'crabstone'
 require 'stringio'
 
 module TestX86
+
+  X86_CODE64 = "\x55\x48\x8b\x05\xb8\x13\x00\x00"
   X86_CODE16 = "\x8d\x4c\x32\x08\x01\xd8\x81\xc6\x34\x12\x00\x00\x05\x23\x01\x00\x00\x36\x8b\x84\x91\x23\x01\x00\x00\x41\x8d\x84\x39\x89\x67\x00\x00\x8d\x87\x89\x67\x00\x00\xb4\xc6"
   X86_CODE32 = "\x8d\x4c\x32\x08\x01\xd8\x81\xc6\x34\x12\x00\x00\x05\x23\x01\x00\x00\x36\x8b\x84\x91\x23\x01\x00\x00\x41\x8d\x84\x39\x89\x67\x00\x00\x8d\x87\x89\x67\x00\x00\xb4\xc6"
-  X86_CODE64 = "\x55\x48\x8b\x05\xb8\x13\x00\x00"
 
   include Crabstone
   include Crabstone::X86
@@ -54,30 +55,32 @@ module TestX86
     Integer(i) & 0xffffffffffffffff
   end
 
-  def self.print_detail cs, i, mode, stringio
+  def self.print_detail cs, i, mode, sio
 
-    stringio.puts("\tPrefix:#{i.prefix.to_a.map {|b| "0x%.2x" % b}.join(' ')} ")
-
-    if i.segment != REG_INVALID then
-      stringio.puts "\tSegment override: #{cs.reg_name(i.segment)}"
-    end
-    stringio.puts("\tOpcode:#{i.opcode.to_a.map {|b| "0x%.2x" % b}.join(' ')} ")
-    stringio.printf("\top_size: %u, addr_size: %u, disp_size: %u, imm_size: %u\n", i.op_size, i.addr_size, i.disp_size, i.imm_size);
-    stringio.printf("\tmodrm: 0x%x\n", i.modrm)
-    stringio.printf("\tdisp: 0x%x\n", (self.uint32(i.disp)))
+    sio.puts("\tPrefix:#{i.prefix.to_a.map {|b| "0x%.2x" % b}.join(' ')} ")
+    sio.puts("\tOpcode:#{i.opcode.to_a.map {|b| "0x%.2x" % b}.join(' ')} ")
+    sio.printf("\trex: 0x%x\n", uint32(i[:rex]))
+    sio.printf("\taddr_size: %u\n", uint32(i[:addr_size]))
+    sio.printf("\tmodrm: 0x%x\n", i.modrm)
+    sio.printf("\tdisp: 0x%x\n", (self.uint32(i.disp)))
 
     #   // SIB is not available in 16-bit mode
     unless mode == MODE_16
-      stringio.printf("\tsib: 0x%x\n", i.sib)
+      sio.printf("\tsib: 0x%x\n", i.sib)
       unless i.sib_index == REG_INVALID
-        stringio.printf(
-          "\tsib_index: %s, sib_scale: %u, sib_base: %s\n",
+        sio.printf(
+          "\t\tsib_base: %s\n\t\tsib_index: %s\n\t\tsib_scale: %u\n",
+          cs.reg_name(i.sib_base),
           cs.reg_name(i.sib_index),
-          i.sib_scale,
-          cs.reg_name(i.sib_base)
+          i.sib_scale
         )
       end
     end
+
+    sio.printf("\tsse_cc: %d\n", i[:sse_cc]) if i[:sse_cc].nonzero?
+    sio.printf("\tavx_cc: %d\n", i[:avx_cc]) if i[:avx_cc].nonzero?
+    sio.printf("\tavx_sae: True\n") if i[:avx_sae]
+    sio.printf("\tavx_rm: %d\n", i[:avx_rm]) if i[:avx_rm].nonzero?
 
     if i.reads_reg?( :eax ) || i.reads_reg?( 19 ) || i.reads_reg?( REG_EAX )
       print '[eax:r] '
@@ -94,39 +97,48 @@ module TestX86
     end
 
     if (count=i.op_count(OP_IMM)).nonzero?
-      stringio.puts "\timm_count: #{count}"
+      sio.puts "\timm_count: #{count}"
       i.operands.select(&:imm?).each_with_index {|op,j|
-        stringio.puts "\t\timms[#{j+1}]: 0x#{self.uint64(op.value).to_s(16)}"
+        sio.puts "\t\timms[#{j+1}]: 0x#{self.uint64(op.value).to_s(16)}"
       }
     end
 
     if i.op_count > 0 then
-      stringio.puts "\top_count: #{i.op_count}"
+      sio.puts "\top_count: #{i.op_count}"
       i.operands.each_with_index do |op,c|
         if op.reg?
-          stringio.puts "\t\toperands[#{c}].type: REG = #{cs.reg_name(op.value)}"
+          sio.puts "\t\toperands[#{c}].type: REG = #{cs.reg_name(op.value)}"
         elsif op.imm?
-          stringio.puts "\t\toperands[#{c}].type: IMM = 0x#{self.uint64(op.value).to_s(16)}"
+          sio.puts "\t\toperands[#{c}].type: IMM = 0x#{self.uint64(op.value).to_s(16)}"
         elsif op.fp?
-          stringio.puts "\t\toperands[#{c}].type: FP = 0x#{(self.uint32(op.value))}"
+          sio.puts "\t\toperands[#{c}].type: FP = 0x#{(self.uint32(op.value))}"
         elsif op.mem?
-          stringio.puts "\t\toperands[#{c}].type: MEM"
+          sio.puts "\t\toperands[#{c}].type: MEM"
+          if op.value[:segment].nonzero?
+            sio.puts "\t\t\toperands[#{c}].mem.segment: REG = %s" % cs.reg_name(op.value[:segment])
+          end
           if op.value[:base].nonzero?
-            stringio.puts "\t\t\toperands[#{c}].mem.base: REG = %s" % cs.reg_name(op.value[:base])
+            sio.puts "\t\t\toperands[#{c}].mem.base: REG = %s" % cs.reg_name(op.value[:base])
           end
           if op.value[:index].nonzero?
-            stringio.puts "\t\t\toperands[#{c}].mem.index: REG = %s" % cs.reg_name(op.value[:index])
+            sio.puts "\t\t\toperands[#{c}].mem.index: REG = %s" % cs.reg_name(op.value[:index])
           end
           if op.value[:scale] != 1
-            stringio.puts "\t\t\toperands[#{c}].mem.scale: %u" % op.value[:scale]
+            sio.puts "\t\t\toperands[#{c}].mem.scale: %u" % op.value[:scale]
           end
           if op.value[:disp].nonzero?
-            stringio.puts "\t\t\toperands[#{c}].mem.disp: 0x%x" % (self.uint64(op.value[:disp]))
+            sio.puts "\t\t\toperands[#{c}].mem.disp: 0x%x" % (self.uint64(op.value[:disp]))
           end
         end
+
+        sio.printf("\t\toperands[#{c}].avx_bcast: %u\n", op[:avx_bcast]) if op[:avx_bcast].nonzero?
+        sio.printf("\t\toperands[#{c}].avx_zero_opmask: TRUE\n") if op[:avx_zero_opmask]
+        sio.printf("\t\toperands[#{c}].size: %u\n", op[:size])
+
       end
     end
-    stringio.puts
+
+    sio.puts
   end
 
   ours = StringIO.new

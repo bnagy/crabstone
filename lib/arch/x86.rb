@@ -12,6 +12,7 @@ module Crabstone
 
         class  MemoryOperand < FFI::Struct
             layout(
+                :segment, :uint,
                 :base, :uint,
                 :index, :uint,
                 :scale, :int,
@@ -22,7 +23,7 @@ module Crabstone
         class OperandValue < FFI::Union
             layout(
                 :reg, :uint,
-                :imm, :long_long,
+                :imm, :int64,
                 :fp, :double,
                 :mem, MemoryOperand
             )
@@ -31,7 +32,10 @@ module Crabstone
         class Operand < FFI::Struct
             layout(
                 :type, :uint,
-                :value, OperandValue
+                :value, OperandValue,
+                :size, :uint8,
+                :avx_bcast, :uint,
+                :avx_zero_opmask, :bool
             )
 
             # A spoonful of sugar...
@@ -76,19 +80,20 @@ module Crabstone
         class Instruction < FFI::Struct
 
             layout(
-                :prefix, [:uint8, 5],
-                :segment, :uint,
-                :opcode, [:uint8, 3],
-                :op_size, :uint8,
+                :prefix, [:uint8, 4],
+                :opcode, [:uint8, 4],
+                :rex, :uint8,
                 :addr_size, :uint8,
-                :disp_size, :uint8,
-                :imm_size, :uint8,
                 :modrm, :uint8,
                 :sib, :uint8,
                 :disp, :int32,
                 :sib_index, :uint,
                 :sib_scale, :int8,
                 :sib_base, :uint,
+                :sse_cc, :uint,
+                :avx_cc, :uint,
+                :avx_sae, :bool,
+                :avx_rm, :uint,
                 :op_count, :uint8,
                 :operands, [Operand, 8]
             )
