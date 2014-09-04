@@ -32,10 +32,10 @@ module Crabstone
                 :imm, :int32,
                 :fp, :double,
                 :mem, MemoryOperand,
-                :pstate, :uint,
+                :pstate, :int,
                 :sys, :uint,
-                :prefetch, :uint,
-                :barrier, :uint
+                :prefetch, :int,
+                :barrier, :int
             )
         end
 
@@ -43,8 +43,8 @@ module Crabstone
 
             layout(
                 :vector_index, :int,
-                :vas, :uint,
-                :vess, :uint,
+                :vas, :int,
+                :vess, :int,
                 :shift, OperandShift,
                 :ext, :uint,
                 :type, :uint,

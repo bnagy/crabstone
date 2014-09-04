@@ -20,7 +20,7 @@ module TestARM64
       'arch' => ARCH_ARM64,
       'mode' => MODE_ARM,
       'code' => ARM64_CODE,
-      'comment' => "ARM64"
+      'comment' => "ARM-64"
     ],
   ]
 
@@ -71,9 +71,9 @@ module TestARM64
             sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x#{self.uint32(op.value[:disp]).to_s(16)}"
           end
         when OP_REG_MRS
-          sio.puts "\t\toperands[#{idx}].type: REG_MRS = 0x#{op.value}\n"
+          sio.puts "\t\toperands[#{idx}].type: REG_MRS = 0x#{op.value.to_s(16)}\n"
         when OP_REG_MSR
-          sio.puts "\t\toperands[#{idx}].type: REG_MSR = 0x#{op[:value][:reg]}\n"
+          sio.puts "\t\toperands[#{idx}].type: REG_MSR = 0x#{op[:value][:reg].to_s(16)}\n"
         when OP_PSTATE
           sio.puts "\t\toperands[#{idx}].type: PSTATE = 0x#{uint32(op.value)}\n"
         when OP_SYS
@@ -117,7 +117,7 @@ module TestARM64
   @platforms.each do |p|
     ours.puts "****************"
     ours.puts "Platform: #{p['comment']}"
-    ours.puts "Code:#{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
+    ours.puts "Code: #{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
     ours.puts "Disasm:"
     cs = Disassembler.new(p['arch'], p['mode'])
 
