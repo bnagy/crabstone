@@ -24,7 +24,7 @@ require_relative 'arch/xcore_registers'
 
 module Crabstone
 
-  VERSION = '2.2.0'
+  VERSION = '3.0rc1'
 
   # Expected C version
   BINDING_MAJ = 3

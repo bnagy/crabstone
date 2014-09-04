@@ -28,3 +28,7 @@
 * Internally change cs_close() signature, so closed handles can't be used
 = 2.2.0
 * Add support for Sparc and SystemZ
+= 3.0rc1
+* Update for C side changes
+* Add support for Xcore
+* ARM, ARM64 and X86 passing, rest waiting for upstream
