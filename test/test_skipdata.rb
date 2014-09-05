@@ -62,7 +62,7 @@ module TestSkipdata
 
   begin
     cs = Disassembler.new(0,0)
-    print "ARM64 Skipdata Test: Capstone v #{cs.version.join('.')} - "
+    print "Skipdata Test: Capstone v #{cs.version.join('.')} - "
   ensure
     cs.close
   end
