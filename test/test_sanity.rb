@@ -73,9 +73,6 @@ module Test
         klass::INS_MAX != checklist[:ins_max] ||
         klass::GRP_MAX != checklist[:grp_max]
       puts "\t#{__FILE__}: #{klass}: FAIL"
-      p klass::REG_MAX
-            p klass::GRP_MAX
-                  p klass::INS_MAX
     else
       puts "\t#{__FILE__}: #{klass}: PASS"
     end

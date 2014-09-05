@@ -263,13 +263,14 @@ module Crabstone
     'V31' => 259
     }
 
+    ID_LOOKUP = REG_LOOKUP.invert
+
     # alias registers
     REG_LOOKUP['IP1'] = REG_LOOKUP['X16']
     REG_LOOKUP['IP0'] = REG_LOOKUP['X17']
     REG_LOOKUP['FP'] = REG_LOOKUP['X29']
     REG_LOOKUP['LR'] = REG_LOOKUP['X30']
 
-    ID_LOOKUP = REG_LOOKUP.invert
     SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
 
     def self.register reg

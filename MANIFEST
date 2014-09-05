@@ -47,6 +47,8 @@
 * test/test_ppc.rb
 * test/test_ppc.rb.SPEC
 * test/test_sanity.rb
+* test/test_skipdata.rb
+* test/test_skipdata.rb.SPEC
 * test/test_sparc.rb
 * test/test_sparc.rb.SPEC
 * test/test_sysz.rb

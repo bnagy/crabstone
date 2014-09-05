@@ -236,6 +236,7 @@ module Crabstone
       'R14W' => 232,
       'R15W' => 233
     }
+    
     ID_LOOKUP = REG_LOOKUP.invert
     SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
 

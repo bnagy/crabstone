@@ -114,6 +114,9 @@ module Crabstone
           'S31' => 110
     }
 
+    # Invert before aliases, so id lookups get 'canonical' reg strings
+    ID_LOOKUP = REG_LOOKUP.invert
+
     # alias registers
     REG_LOOKUP['R13'] = REG_LOOKUP['SP']
     REG_LOOKUP['R14'] = REG_LOOKUP['LR']
@@ -123,7 +126,6 @@ module Crabstone
     REG_LOOKUP['FP' ] = REG_LOOKUP['R11']
     REG_LOOKUP['IP' ] = REG_LOOKUP['R12']
     
-    ID_LOOKUP = REG_LOOKUP.invert
     SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
 
     def self.register reg

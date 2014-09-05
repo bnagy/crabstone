@@ -64,7 +64,6 @@ module Crabstone
   OPT_SKIPDATA       = 5  # Skip data when disassembling. Then engine is in SKIPDATA mode.
   OPT_SKIPDATA_SETUP = 6  # Setup user-defined function for SKIPDATA option
 
-
   # Query values for cs_support()
   SUPPORT_DIET       = ARCH_ALL + 1
   SUPPORT_X86_REDUCE = ARCH_ALL + 2
@@ -96,8 +95,8 @@ module Crabstone
   class ErrMemSetup < StandardError; end
   class ErrVersion < StandardError; end
   class ErrDiet < StandardError; end
-  class ErrSkipData < StandardError; end  
-  class ErrX86ATT < StandardError; end  
+  class ErrSkipData < StandardError; end
+  class ErrX86ATT < StandardError; end
   class ErrX86Intel < StandardError; end
 
   ERRNO = {
@@ -182,6 +181,16 @@ module Crabstone
         :mnemonic, [:char, 32],
         :op_str, [:char, 160],
         :detail, Detail.ptr
+      )
+    end
+
+    callback :skipdata_cb, [:pointer, :size_t, :size_t, :pointer], :size_t
+
+    class SkipdataConfig < FFI::Struct
+      layout(
+        :mnemonic, :pointer,
+        :callback, :skipdata_cb,
+        :unused, :pointer
       )
     end
 
@@ -335,7 +344,7 @@ module Crabstone
         # Dispatch to toplevel Instruction class ( this file )
         raw_insn[meth]
       else
-        # Nothing else is available with details.
+        # Nothing else is available without details.
         if not detailed?
           raise(
             NoMethodError,
@@ -493,6 +502,44 @@ module Crabstone
       Binding.cs_errno(csh)
     end
 
+    def skipdata mnemonic='.byte'
+
+      cfg = Binding::SkipdataConfig.new
+      cfg[:mnemonic] = FFI::MemoryPointer.from_string String(mnemonic)
+
+      if block_given?
+
+        real_cb = FFI::Function.new(
+          :size_t,
+          [:pointer, :size_t, :size_t, :pointer]
+        ) {|code, sz, offset, _|
+
+          code = code.read_array_of_uchar(sz).pack('c*')
+          begin
+            res = yield code, offset
+          rescue
+            warn "Error in skipdata callback: #{$!}"
+          end
+          # If the user block returns something we can't turn into a :size_t,
+          # then it's probably better to let this go ahead and raise.
+          Integer(res)
+        }
+
+        cfg[:callback] = real_cb
+
+      end
+
+      res = Binding.cs_option(csh, OPT_SKIPDATA_SETUP, cfg.pointer.address)
+      Crabstone.raise_errno res if res.nonzero?
+      res = Binding.cs_option(csh, OPT_SKIPDATA, SKIPDATA[true])
+      Crabstone.raise_errno res if res.nonzero?
+    end
+
+    def skipdata_off
+      res = Binding.cs_option(csh, OPT_SKIPDATA, SKIPDATA[false])
+      Crabstone.raise_errno res if res.nonzero?
+    end
+
     def reg_name regid
       Crabstone.raise_errno( Crabstone::ERRNO_KLASS[ErrDiet] ) if DIET_MODE
       name = Binding.cs_reg_name(csh, regid)
@@ -501,10 +548,8 @@ module Crabstone
     end
 
     def disasm code, offset, count=0, &blk
-
       return [] if code.empty?
       Disassembly.new self, code, offset, count
-
     end
 
   end
