@@ -388,7 +388,6 @@ module Crabstone
     end
 
     def each &blk
-      begin
 
         insn       = Binding::Instruction.new
         insn_ptr   = FFI::MemoryPointer.new insn
@@ -402,14 +401,15 @@ module Crabstone
         )
         Crabstone.raise_errno(errno) if insn_count.zero?
 
+      begin
         (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
           cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
           yield Instruction.new engine.csh, cs_insn, engine.arch
         }
       ensure
-        first_insn = insn_ptr.read_pointer
-        Binding.cs_free first_insn, insn_count unless first_insn.null?
+        Binding.cs_free first_insn, insn_count
       end
+
     end
 
     # Use of this method CAN BE LEAKY, please take care.
@@ -517,12 +517,11 @@ module Crabstone
           code = code.read_array_of_uchar(sz).pack('c*')
           begin
             res = yield code, offset
+            Integer(res)
           rescue
             warn "Error in skipdata callback: #{$!}"
+            # It will go on to crash, but now at least there's more info :)
           end
-          # If the user block returns something we can't turn into a :size_t,
-          # then it's probably better to let this go ahead and raise.
-          Integer(res)
         }
 
         cfg[:callback] = real_cb
@@ -547,7 +546,7 @@ module Crabstone
       name
     end
 
-    def disasm code, offset, count=0, &blk
+    def disasm code, offset, count=0
       return [] if code.empty?
       Disassembly.new self, code, offset, count
     end
