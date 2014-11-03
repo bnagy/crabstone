@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
 
   spec.extra_rdoc_files = ['CHANGES', 'README.md', 'MANIFEST']
 
-  spec.add_runtime_dependency 'ffi'
+  spec.add_runtime_dependency 'ffi' unless RUBY_PLATFORM =~/java/
   spec.add_development_dependency 'test-unit'
 
   spec.description = <<-EOF
