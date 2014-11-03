@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'date'
+
 # I hate these little scripts :(
 
 unless ARGV.length == 1
@@ -39,6 +41,7 @@ pyfiles.each {|fn|
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
 # Command: #{$0} #{ARGV[0]}
+# #{DateTime.now}
 
 module Crabstone
   module #{mod}

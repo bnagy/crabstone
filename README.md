@@ -6,14 +6,14 @@ NOTICE
 
 Imagine one of those under construction gifs here.
 
-Upstream will be merging 3.0 before mid-Sept 2014, at which point 2.2 will cease to exist, so there will be nothing to build against to use this binding branch. I'm therefore upgrading BOTH master and next to upstream 3.0 as soon as possible. For now, this is probably broken, and new installs should wait. Sorry.
+Upstream will be finalizing 3.0 mid-Nov 2014, and 2.2 is dead, so since this is a young project with few users I'm forcing an upgrade to 3.0 for both master and next.
 
 STATUS
 ===
 
-X86, Arm and Arm64 are passing.
+Hopefully working.
 
-Current Library binding: 3.0
+Current Library binding: 3.0rc3
 ----
 
 ( FROM THE CAPSTONE README )
@@ -52,7 +52,7 @@ Then (until we publish a gem) clone the repo, then do this:
 
 ```bash
 gem build crabstone.gemspec
-gem install crabstone-2.2.0.gem
+gem install crabstone-3.0rc3.gem
 rake test
 ```
 

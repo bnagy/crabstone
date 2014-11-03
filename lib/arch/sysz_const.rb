@@ -4,7 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: ./const_gen /Users/ben/src/capstone/bindings/python/capstone
+# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-03T10:58:08+12:00
 
 module Crabstone
   module SysZ
@@ -31,9 +32,9 @@ module Crabstone
     
     OP_INVALID = 0
     OP_REG = 1
-    OP_ACREG = 2
-    OP_IMM = 3
-    OP_MEM = 4
+    OP_IMM = 2
+    OP_MEM = 3
+    OP_ACREG = 64
     
     # SystemZ registers
     
@@ -72,7 +73,7 @@ module Crabstone
     REG_F14 = 32
     REG_F15 = 33
     REG_R0L = 34
-    REG_MAX = 35
+    REG_ENDING = 35
     
     # SystemZ instruction
     
@@ -758,17 +759,21 @@ module Crabstone
     INS_XR = 679
     INS_XRK = 680
     INS_XY = 681
-    INS_MAX = 682
+    INS_ENDING = 682
     
     # Group of SystemZ instructions
     
     GRP_INVALID = 0
-    GRP_DISTINCTOPS = 1
-    GRP_FPEXTENSION = 2
-    GRP_HIGHWORD = 3
-    GRP_INTERLOCKEDACCESS1 = 4
-    GRP_LOADSTOREONCOND = 5
-    GRP_JUMP = 6
-    GRP_MAX = 7
+    
+    # Generic groups
+    GRP_JUMP = 1
+    
+    # Architecture-specific groups
+    GRP_DISTINCTOPS = 128
+    GRP_FPEXTENSION = 129
+    GRP_HIGHWORD = 130
+    GRP_INTERLOCKEDACCESS1 = 131
+    GRP_LOADSTOREONCOND = 132
+    GRP_ENDING = 133
   end
 end

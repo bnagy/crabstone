@@ -4,7 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: ./const_gen /Users/ben/src/capstone/bindings/python/capstone
+# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-03T10:58:08+12:00
 
 module Crabstone
   module ARM64
@@ -146,7 +147,7 @@ module Crabstone
     SYSREG_ICC_RPR_EL1 = 0xc65b
     SYSREG_ICH_VTR_EL2 = 0xe659
     SYSREG_ICH_EISR_EL2 = 0xe65b
-    SYSREG_ICH_ELSR_EL2 = 0xe65d # 1110011001011101
+    SYSREG_ICH_ELSR_EL2 = 0xe65d
     
     # System registers for MSR
     SYSREG_DBGDTRTX_EL0 = 0x9828
@@ -159,7 +160,7 @@ module Crabstone
     SYSREG_ICC_DIR_EL1 = 0xc659
     SYSREG_ICC_SGI1R_EL1 = 0xc65d
     SYSREG_ICC_ASGI1R_EL1 = 0xc65e
-    SYSREG_ICC_SGI0R_EL1 = 0xc65f # 1100011001011111
+    SYSREG_ICC_SGI0R_EL1 = 0xc65f
     
     # System PState Field (MSR instruction)
     
@@ -209,16 +210,16 @@ module Crabstone
     
     OP_INVALID = 0
     OP_REG = 1
-    OP_CIMM = 2
-    OP_IMM = 3
+    OP_IMM = 2
+    OP_MEM = 3
     OP_FP = 4
-    OP_MEM = 5
-    OP_REG_MRS = 6
-    OP_REG_MSR = 7
-    OP_PSTATE = 8
-    OP_SYS = 9
-    OP_PREFETCH = 10
-    OP_BARRIER = 11
+    OP_CIMM = 64
+    OP_REG_MRS = 65
+    OP_REG_MSR = 66
+    OP_PSTATE = 67
+    OP_SYS = 68
+    OP_PREFETCH = 69
+    OP_BARRIER = 70
     
     # TLBI operations
     
@@ -573,7 +574,7 @@ module Crabstone
     REG_V29 = 257
     REG_V30 = 258
     REG_V31 = 259
-    REG_MAX = 260
+    REG_ENDING = 260
     
     # alias registers
     REG_IP1 = REG_X16
@@ -1035,16 +1036,20 @@ module Crabstone
     INS_DC = 449
     INS_AT = 450
     INS_TLBI = 451
-    INS_MAX = 452
+    INS_ENDING = 452
     
     # Group of ARM64 instructions
     
     GRP_INVALID = 0
-    GRP_CRYPTO = 1
-    GRP_FPARMV8 = 2
-    GRP_NEON = 3
-    GRP_CRC = 4
-    GRP_JUMP = 5
-    GRP_MAX = 6
+    
+    # Generic groups
+    GRP_JUMP = 1
+    
+    # Architecture-specific groups
+    GRP_CRYPTO = 128
+    GRP_FPARMV8 = 129
+    GRP_NEON = 130
+    GRP_CRC = 131
+    GRP_ENDING = 132
   end
 end

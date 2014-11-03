@@ -32,3 +32,10 @@
 * Update for C side changes
 * Add support for Xcore
 * ARM, ARM64 and X86 passing, rest waiting for upstream
+= 3.0rc3
+* Generic groups ( CS_GRP_JUMP, CS_GRP_CALL etc)
+* Mips 32R6 + MICRO
+* Many constant changes
+* PPC CRX operand
+* X86: added prefixed symbols
+* THIS IS A BREAKING CHANGE ( even from rc1 )

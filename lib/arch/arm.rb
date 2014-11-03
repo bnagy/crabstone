@@ -41,14 +41,15 @@ module Crabstone
         :vector_index, :int,
         :shift, OperandShift,
         :type, :uint,
-        :value, OperandValue
+        :value, OperandValue,
+        :subtracted, :bool
       )
 
       def value
         case self[:type]
         when *[OP_REG, OP_SYSREG]
           self[:value][:reg]
-        when OP_IMM
+        when *[OP_IMM, OP_CIMM, OP_PIMM]
           self[:value][:imm]
         when OP_MEM
           self[:value][:mem]
@@ -62,11 +63,11 @@ module Crabstone
       end
 
       def reg?
-        self[:type] == OP_REG
+        [OP_REG, OP_SYSREG].include? self[:type]
       end
 
       def imm?
-        self[:type] == OP_IMM
+        [OP_IMM, OP_CIMM, OP_PIMM].include? self[:type]
       end
 
       def cimm?
@@ -107,9 +108,9 @@ module Crabstone
       layout(
         :usermode, :bool,
         :vector_size, :int,
-        :vector_data, :uint,
-        :cps_mode, :uint,
-        :cps_flag, :uint,
+        :vector_data, :int,
+        :cps_mode, :int,
+        :cps_flag, :int,
         :cc, :uint,
         :update_flags, :bool,
         :writeback, :bool,

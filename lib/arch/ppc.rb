@@ -17,11 +17,20 @@ module Crabstone
             )
         end
 
+        class CrxOperand < FFI::Struct
+            layout(
+                :scale, :uint,
+                :reg, :uint,
+                :cond, :uint
+            )
+        end
+
         class OperandValue < FFI::Union
             layout(
                 :reg, :uint,
                 :imm, :int32,
-                :mem, MemoryOperand
+                :mem, MemoryOperand,
+                :crx, CrxOperand
             )
         end
 
@@ -39,6 +48,8 @@ module Crabstone
                     self[:value][:imm]
                 when OP_MEM
                     self[:value][:mem]
+                when OP_CRX
+                    self[:value][:crx]
                 else
                     nil
                 end

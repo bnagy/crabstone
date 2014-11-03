@@ -24,12 +24,13 @@ require_relative 'arch/xcore_registers'
 
 module Crabstone
 
-  VERSION = '3.0rc1'
+  VERSION = '3.0rc3'
 
-  # Expected C version
+  # API version
   BINDING_MAJ = 3
   BINDING_MIN = 0
 
+  # architectures
   ARCH_ARM   = 0
   ARCH_ARM64 = 1
   ARCH_MIPS  = 2
@@ -41,30 +42,55 @@ module Crabstone
   ARCH_MAX   = 8
   ARCH_ALL   = 0xFFFF
 
-  MODE_LITTLE_ENDIAN = 0       # little endian mode (default mode)
-  MODE_ARM           = 0       # 32-bit ARM
-  MODE_16            = 1 << 1  # 16-bit mode
-  MODE_32            = 1 << 2  # 32-bit mode
-  MODE_64            = 1 << 3  # 64-bit mode
-  MODE_THUMB         = 1 << 4  # ARM's Thumb mode including Thumb-2
-  MODE_MCLASS        = 1 << 5  # ARM's Cortex-M series
-  MODE_MICRO         = 1 << 4  # MicroMips mode (MIPS architecture)
-  MODE_N64           = 1 << 5  # Nintendo-64 mode (MIPS architecture)
-  MODE_MIPS3         = 1 << 6  # Mips III ISA
-  MODE_MIPS32R6      = 1 << 7  # Mips32r6 ISA
-  MODE_MIPSGP64      = 1 << 8  # General Purpose Registers are 64-bit wide (MIPS arch)
-  MODE_V9            = 1 << 4  # SparcV9 mode (Sparc architecture)
-  MODE_BIG_ENDIAN    = 1 << 31 # big endian mode
+  # disasm mode
+  MODE_LITTLE_ENDIAN = 0          # little-endian mode (default mode)
+  MODE_ARM           = 0          # ARM mode
+  MODE_16            = (1 << 1)   # 16-bit mode (for X86, Mips)
+  MODE_32            = (1 << 2)   # 32-bit mode (for X86, Mips)
+  MODE_64            = (1 << 3)   # 64-bit mode (for X86, Mips)
+  MODE_THUMB         = (1 << 4)   # ARM's Thumb mode, including Thumb-2
+  MODE_MCLASS        = (1 << 5)   # ARM's Cortex-M series
+  MODE_MICRO         = (1 << 4)   # MicroMips mode (MIPS architecture)
+  MODE_MIPS3         = (1 << 5)   # Mips III ISA
+  MODE_MIPS32R6      = (1 << 6)   # Mips32r6 ISA
+  MODE_MIPSGP64      = (1 << 7)   # General Purpose Registers are 64-bit wide (MIPS arch)
+  MODE_V9            = (1 << 4)   # Nintendo-64 mode (MIPS architecture)
+  MODE_BIG_ENDIAN    = (1 << 31)  # big-endian mode
 
-  # Option types and values ( so far ) for cs_option()
-  OPT_SYNTAX         = 1  # Asssembly output syntax
+  # Capstone option type
+  OPT_SYNTAX         = 1  # Intel X86 asm syntax (ARCH_X86 arch)
   OPT_DETAIL         = 2  # Break down instruction structure into details
   OPT_MODE           = 3  # Change engine's mode at run-time
-  OPT_MEM            = 4  # User-defined dynamic memory related functions
-  OPT_SKIPDATA       = 5  # Skip data when disassembling. Then engine is in SKIPDATA mode.
+  OPT_MEM            = 4  # Change engine's mode at run-time
+  OPT_SKIPDATA       = 5  # Skip data when disassembling
   OPT_SKIPDATA_SETUP = 6  # Setup user-defined function for SKIPDATA option
 
-  # Query values for cs_support()
+  # Capstone option value
+  OPT_OFF = 0 # Turn OFF an option - default option of OPT_DETAIL
+  OPT_ON  = 3 # Turn ON an option (OPT_DETAIL)
+
+  # Common instruction operand types - to be consistent across all architectures.
+  OP_INVALID = 0
+  OP_REG     = 1
+  OP_IMM     = 2
+  OP_MEM     = 3
+  OP_FP      = 4
+
+  # Common instruction groups - to be consistent across all architectures.
+  GRP_INVALID = 0  # uninitialized/invalid group.
+  GRP_JUMP    = 1  # all jump instructions (conditional+direct+indirect jumps)
+  GRP_CALL    = 2  # all call instructions
+  GRP_RET     = 3  # all return instructions
+  GRP_INT     = 4  # all interrupt instructions (int+syscall)
+  GRP_IRET    = 5  # all interrupt return instructions
+
+  # Capstone syntax value
+  OPT_SYNTAX_DEFAULT   = 0  # Default assembly syntax of all platforms (OPT_SYNTAX)
+  OPT_SYNTAX_INTEL     = 1  # Intel X86 asm syntax - default syntax on X86 (OPT_SYNTAX, ARCH_X86)
+  OPT_SYNTAX_ATT       = 2  # ATT asm syntax (OPT_SYNTAX, ARCH_X86)
+  OPT_SYNTAX_NOREGNAME = 3  # Asm syntax prints register name with only number - (OPT_SYNTAX, ARCH_PPC, ARCH_ARM)
+
+  # query id for cs_support()
   SUPPORT_DIET       = ARCH_ALL + 1
   SUPPORT_X86_REDUCE = ARCH_ALL + 2
 
@@ -202,6 +228,7 @@ module Crabstone
     attach_function :cs_close, [:pointer], :cs_err
     attach_function :cs_errno, [:csh], :cs_err
     attach_function :cs_free, [:pointer, :size_t], :void
+    attach_function :cs_group_name, [:csh, :uint], :string
     attach_function :cs_insn_group, [:csh, Instruction, :uint], :bool
     attach_function :cs_insn_name, [:csh, :uint], :string
     attach_function :cs_op_count, [:csh, Instruction, :uint], :cs_err
@@ -210,9 +237,9 @@ module Crabstone
     attach_function :cs_reg_name, [:csh, :uint], :string
     attach_function :cs_reg_read, [:csh, Instruction, :uint], :bool
     attach_function :cs_reg_write, [:csh, Instruction, :uint], :bool
-    attach_function :cs_version, [:pointer, :pointer], :uint
-    attach_function :cs_support, [:cs_arch], :bool
     attach_function :cs_strerror, [:cs_err], :string
+    attach_function :cs_support, [:cs_arch], :bool
+    attach_function :cs_version, [:pointer, :pointer], :uint
 
   end # Binding
 
@@ -265,7 +292,15 @@ module Crabstone
     end
 
     def name
+      raise_if_diet
       name = Binding.cs_insn_name(csh, id)
+      Crabstone.raise_errno( ERRNO_KLASS[ErrCsh] ) unless name
+      name
+    end
+
+    def group_name grp
+      raise_if_diet
+      name = Binding.cs_group_name(csh, Integer(grp))
       Crabstone.raise_errno( ERRNO_KLASS[ErrCsh] ) unless name
       name
     end
@@ -389,17 +424,18 @@ module Crabstone
 
     def each &blk
 
-        insn       = Binding::Instruction.new
-        insn_ptr   = FFI::MemoryPointer.new insn
-        insn_count = Binding.cs_disasm(
-          engine.csh,
-          @code,
-          @code.bytesize,
-          @offset,
-          @count,
-          insn_ptr
-        )
-        Crabstone.raise_errno(errno) if insn_count.zero?
+      insn       = Binding::Instruction.new
+      insn_ptr   = FFI::MemoryPointer.new insn
+      insn_count = Binding.cs_disasm(
+        engine.csh,
+        @code,
+        @code.bytesize,
+        @offset,
+        @count,
+        insn_ptr
+      )
+      Crabstone.raise_errno(errno) if insn_count.zero?
+      cs_resources = [insn_ptr.read_pointer, insn_count]
 
       begin
         (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
@@ -407,7 +443,7 @@ module Crabstone
           yield Instruction.new engine.csh, cs_insn, engine.arch
         }
       ensure
-        Binding.cs_free first_insn, insn_count
+        Binding.cs_free( *cs_resources )
       end
 
     end

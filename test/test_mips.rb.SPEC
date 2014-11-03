@@ -1,20 +1,3 @@
-Frag-0: 1
-Frag-1: 3
-Frag-0: 1
-Frag-1: 0
-Frag-2: 0
-Frag-3: 1
-Frag-4: 0
-Frag-5: 0
-Frag-0: 1
-Frag-1: 0
-Frag-2: 6
-Frag-0: 1
-Frag-1: 0
-Frag-2: 0
-Frag-3: 1
-Frag-4: 2
-Frag-5: 0
 ****************
 Platform: MIPS-32 (Big-endian)
 Code:0x0c 0x10 0x00 0x97 0x00 0x00 0x00 0x00 0x24 0x02 0x00 0x0c 0x8f 0xa2 0x00 0x00 0x34 0x21 0x34 0x56 
@@ -45,18 +28,6 @@ Disasm:
 
 0x1014:
 
-Frag-0: 1
-Frag-1: 0
-Frag-2: 0
-Frag-3: 1
-Frag-4: 2
-Frag-5: 0
-Frag-0: 1
-Frag-1: 0
-Frag-2: 0
-Frag-3: 1
-Frag-4: 2
-Frag-5: 0
 ****************
 Platform: MIPS-64-EL (Little-endian)
 Code:0x56 0x34 0x21 0x34 0xc2 0x17 0x01 0x00 
@@ -74,4 +45,29 @@ Disasm:
 		operands[2].type: IMM = 0x1f
 
 0x1008:
+
+****************
+Platform: MIPS-32R6 | Micro (Big-endian)
+Code:0x00 0x07 0x00 0x07 0x00 0x11 0x93 0x7c 0x01 0x8c 0x8b 0x7c 0x00 0xc7 0x48 0xd0 
+Disasm:
+0x1000:	break	7, 0
+	op_count: 2
+		operands[0].type: IMM = 0x7
+		operands[1].type: IMM = 0x0
+
+0x1004:	wait	0x11
+	op_count: 1
+		operands[0].type: IMM = 0x11
+
+0x1008:	syscall	0x18c
+	op_count: 1
+		operands[0].type: IMM = 0x18c
+
+0x100c:	rotrv	$t1, $a2, $a3
+	op_count: 3
+		operands[0].type: REG = t1
+		operands[1].type: REG = a2
+		operands[2].type: REG = a3
+
+0x1010:
 

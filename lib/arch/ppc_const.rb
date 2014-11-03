@@ -4,7 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: ./const_gen /Users/ben/src/capstone/bindings/python/capstone
+# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-03T10:58:08+12:00
 
 module Crabstone
   module PPC
@@ -20,22 +21,8 @@ module Crabstone
     BC_NE = (2<<5)|4
     BC_UN = (3<<5)|12
     BC_NU = (3<<5)|4
-    BC_LT_MINUS = (0<<5)|14
-    BC_LE_MINUS = (1<<5)|6
-    BC_EQ_MINUS = (2<<5)|14
-    BC_GE_MINUS = (0<<5)|6
-    BC_GT_MINUS = (1<<5)|14
-    BC_NE_MINUS = (2<<5)|6
-    BC_UN_MINUS = (3<<5)|14
-    BC_NU_MINUS = (3<<5)|6
-    BC_LT_PLUS = (0<<5)|15
-    BC_LE_PLUS = (1<<5)|7
-    BC_EQ_PLUS = (2<<5)|15
-    BC_GE_PLUS = (0<<5)|7
-    BC_GT_PLUS = (1<<5)|15
-    BC_NE_PLUS = (2<<5)|7
-    BC_UN_PLUS = (3<<5)|15
-    BC_NU_PLUS = (3<<5)|7
+    BC_SO = (4<<5)|12
+    BC_NS = (4<<5)|4
     
     # PPC branch hint for some branch instructions
     
@@ -49,6 +36,7 @@ module Crabstone
     OP_REG = 1
     OP_IMM = 2
     OP_MEM = 3
+    OP_CRX = 64
     
     # PPC registers
     
@@ -230,7 +218,7 @@ module Crabstone
     REG_CTR8 = 175
     REG_LR8 = 176
     REG_CR1EQ = 177
-    REG_MAX = 178
+    REG_ENDING = 178
     
     # PPC instruction
     
@@ -1003,22 +991,191 @@ module Crabstone
     INS_XXSPLTW = 766
     INS_BCA = 767
     INS_BCLA = 768
-    INS_MAX = 769
+    INS_SLWI = 769
+    INS_SRWI = 770
+    INS_SLDI = 771
+    INS_BTA = 772
+    INS_CRSET = 773
+    INS_CRNOT = 774
+    INS_CRMOVE = 775
+    INS_CRCLR = 776
+    INS_MFBR0 = 777
+    INS_MFBR1 = 778
+    INS_MFBR2 = 779
+    INS_MFBR3 = 780
+    INS_MFBR4 = 781
+    INS_MFBR5 = 782
+    INS_MFBR6 = 783
+    INS_MFBR7 = 784
+    INS_MFXER = 785
+    INS_MFRTCU = 786
+    INS_MFRTCL = 787
+    INS_MFDSCR = 788
+    INS_MFDSISR = 789
+    INS_MFDAR = 790
+    INS_MFSRR2 = 791
+    INS_MFSRR3 = 792
+    INS_MFCFAR = 793
+    INS_MFAMR = 794
+    INS_MFPID = 795
+    INS_MFTBLO = 796
+    INS_MFTBHI = 797
+    INS_MFDBATU = 798
+    INS_MFDBATL = 799
+    INS_MFIBATU = 800
+    INS_MFIBATL = 801
+    INS_MFDCCR = 802
+    INS_MFICCR = 803
+    INS_MFDEAR = 804
+    INS_MFESR = 805
+    INS_MFSPEFSCR = 806
+    INS_MFTCR = 807
+    INS_MFASR = 808
+    INS_MFPVR = 809
+    INS_MFTBU = 810
+    INS_MTCR = 811
+    INS_MTBR0 = 812
+    INS_MTBR1 = 813
+    INS_MTBR2 = 814
+    INS_MTBR3 = 815
+    INS_MTBR4 = 816
+    INS_MTBR5 = 817
+    INS_MTBR6 = 818
+    INS_MTBR7 = 819
+    INS_MTXER = 820
+    INS_MTDSCR = 821
+    INS_MTDSISR = 822
+    INS_MTDAR = 823
+    INS_MTSRR2 = 824
+    INS_MTSRR3 = 825
+    INS_MTCFAR = 826
+    INS_MTAMR = 827
+    INS_MTPID = 828
+    INS_MTTBL = 829
+    INS_MTTBU = 830
+    INS_MTTBLO = 831
+    INS_MTTBHI = 832
+    INS_MTDBATU = 833
+    INS_MTDBATL = 834
+    INS_MTIBATU = 835
+    INS_MTIBATL = 836
+    INS_MTDCCR = 837
+    INS_MTICCR = 838
+    INS_MTDEAR = 839
+    INS_MTESR = 840
+    INS_MTSPEFSCR = 841
+    INS_MTTCR = 842
+    INS_NOT = 843
+    INS_MR = 844
+    INS_ROTLD = 845
+    INS_ROTLDI = 846
+    INS_CLRLDI = 847
+    INS_ROTLWI = 848
+    INS_CLRLWI = 849
+    INS_ROTLW = 850
+    INS_SUB = 851
+    INS_SUBC = 852
+    INS_LWSYNC = 853
+    INS_PTESYNC = 854
+    INS_TDLT = 855
+    INS_TDEQ = 856
+    INS_TDGT = 857
+    INS_TDNE = 858
+    INS_TDLLT = 859
+    INS_TDLGT = 860
+    INS_TDU = 861
+    INS_TDLTI = 862
+    INS_TDEQI = 863
+    INS_TDGTI = 864
+    INS_TDNEI = 865
+    INS_TDLLTI = 866
+    INS_TDLGTI = 867
+    INS_TDUI = 868
+    INS_TLBREHI = 869
+    INS_TLBRELO = 870
+    INS_TLBWEHI = 871
+    INS_TLBWELO = 872
+    INS_TWLT = 873
+    INS_TWEQ = 874
+    INS_TWGT = 875
+    INS_TWNE = 876
+    INS_TWLLT = 877
+    INS_TWLGT = 878
+    INS_TWU = 879
+    INS_TWLTI = 880
+    INS_TWEQI = 881
+    INS_TWGTI = 882
+    INS_TWNEI = 883
+    INS_TWLLTI = 884
+    INS_TWLGTI = 885
+    INS_TWUI = 886
+    INS_WAITRSV = 887
+    INS_WAITIMPL = 888
+    INS_XNOP = 889
+    INS_XVMOVDP = 890
+    INS_XVMOVSP = 891
+    INS_XXSPLTD = 892
+    INS_XXMRGHD = 893
+    INS_XXMRGLD = 894
+    INS_XXSWAPD = 895
+    INS_BT = 896
+    INS_BF = 897
+    INS_BDNZT = 898
+    INS_BDNZF = 899
+    INS_BDZF = 900
+    INS_BDZT = 901
+    INS_BFA = 902
+    INS_BDNZTA = 903
+    INS_BDNZFA = 904
+    INS_BDZTA = 905
+    INS_BDZFA = 906
+    INS_BTCTR = 907
+    INS_BFCTR = 908
+    INS_BTCTRL = 909
+    INS_BFCTRL = 910
+    INS_BTL = 911
+    INS_BFL = 912
+    INS_BDNZTL = 913
+    INS_BDNZFL = 914
+    INS_BDZTL = 915
+    INS_BDZFL = 916
+    INS_BTLA = 917
+    INS_BFLA = 918
+    INS_BDNZTLA = 919
+    INS_BDNZFLA = 920
+    INS_BDZTLA = 921
+    INS_BDZFLA = 922
+    INS_BTLR = 923
+    INS_BFLR = 924
+    INS_BDNZTLR = 925
+    INS_BDZTLR = 926
+    INS_BDZFLR = 927
+    INS_BTLRL = 928
+    INS_BFLRL = 929
+    INS_BDNZTLRL = 930
+    INS_BDNZFLRL = 931
+    INS_BDZTLRL = 932
+    INS_BDZFLRL = 933
+    INS_ENDING = 934
     
     # Group of PPC instructions
     
     GRP_INVALID = 0
-    GRP_ALTIVEC = 1
-    GRP_MODE32 = 2
-    GRP_MODE64 = 3
-    GRP_BOOKE = 4
-    GRP_NOTBOOKE = 5
-    GRP_SPE = 6
-    GRP_VSX = 7
-    GRP_E500 = 8
-    GRP_PPC4XX = 9
-    GRP_PPC6XX = 10
-    GRP_JUMP = 11
-    GRP_MAX = 12
+    
+    # Generic groups
+    GRP_JUMP = 1
+    
+    # Architecture-specific groups
+    GRP_ALTIVEC = 128
+    GRP_MODE32 = 129
+    GRP_MODE64 = 130
+    GRP_BOOKE = 131
+    GRP_NOTBOOKE = 132
+    GRP_SPE = 133
+    GRP_VSX = 134
+    GRP_E500 = 135
+    GRP_PPC4XX = 136
+    GRP_PPC6XX = 137
+    GRP_ENDING = 138
   end
 end

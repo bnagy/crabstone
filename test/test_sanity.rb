@@ -21,37 +21,37 @@ module Test
     Crabstone::ARM64 => Hash[
       reg_max: 260,
       ins_max: 452,
-      grp_max: 6
+      grp_max: 132
     ],
     Crabstone::ARM => Hash[
       reg_max: 111,
       ins_max: 435,
-      grp_max: 33
+      grp_max: 159
     ],
     Crabstone::MIPS => Hash[
-      reg_max: 129,
-      ins_max: 350,
-      grp_max: 35
+      reg_max: 136,
+      ins_max: 586,
+      grp_max: 161
     ],
     Crabstone::PPC => Hash[
       reg_max: 178,
-      ins_max: 769,
-      grp_max: 12
+      ins_max: 934,
+      grp_max: 138
+    ],
+    Crabstone::Sparc => Hash[
+      reg_max: 88,
+      ins_max: 279,
+      grp_max: 135
     ],
     Crabstone::SysZ => Hash[
       reg_max: 35,
       ins_max: 682,
-      grp_max: 7
-    ],
-    Crabstone::Sparc => Hash[
-      reg_max: 87,
-      ins_max: 277,
-      grp_max: 9
+      grp_max: 133
     ],
     Crabstone::X86 => Hash[
       reg_max: 234,
-      ins_max: 1298,
-      grp_max: 47
+      ins_max: 1295,
+      grp_max: 169
     ],
     Crabstone::XCore => Hash[
       reg_max: 26,
@@ -69,9 +69,9 @@ module Test
 
   #Test through all modes and architectures
   @checks.each do |klass, checklist|
-    if klass::REG_MAX != checklist[:reg_max] ||
-        klass::INS_MAX != checklist[:ins_max] ||
-        klass::GRP_MAX != checklist[:grp_max]
+    if klass::REG_ENDING != checklist[:reg_max] ||
+        klass::INS_ENDING != checklist[:ins_max] ||
+        klass::GRP_ENDING != checklist[:grp_max]
       puts "\t#{__FILE__}: #{klass}: FAIL"
     else
       puts "\t#{__FILE__}: #{klass}: PASS"

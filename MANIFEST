@@ -55,5 +55,7 @@
 * test/test_sysz.rb.SPEC
 * test/test_x86.rb
 * test/test_x86.rb.SPEC
+* test/text_xcore.rb
+* test/test_xcore.rb.SPEC
 
 * bin/genconst

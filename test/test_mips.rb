@@ -11,6 +11,8 @@ require 'stringio'
 module TestMIPS
   MIPS_CODE = "\x0C\x10\x00\x97\x00\x00\x00\x00\x24\x02\x00\x0c\x8f\xa2\x00\x00\x34\x21\x34\x56"
   MIPS_CODE2 = "\x56\x34\x21\x34\xc2\x17\x01\x00"
+  MIPS_32R6 = "\x00\x07\x00\x07\x00\x11\x93\x7c\x01\x8c\x8b\x7c\x00\xc7\x48\xd0"
+
   include Crabstone
   include Crabstone::MIPS
 
@@ -26,6 +28,12 @@ module TestMIPS
       'mode' => MODE_64+ MODE_LITTLE_ENDIAN,
       'code' => MIPS_CODE2,
       'comment' => "MIPS-64-EL (Little-endian)"
+    ],
+    Hash[
+      'arch' => ARCH_MIPS,
+      'mode' => MODE_32 + MODE_MIPS32R6 + MODE_MICRO + MODE_BIG_ENDIAN,
+      'code' => MIPS_32R6,
+      'comment' => "MIPS-32R6 | Micro (Big-endian)"
     ]
   ]
 
@@ -95,6 +103,8 @@ module TestMIPS
   if ours.read == theirs
     puts "#{__FILE__}: PASS"
   else
+    ours.rewind
+    puts ours.read
     puts "#{__FILE__}: FAIL"
   end
 end

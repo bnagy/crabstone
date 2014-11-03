@@ -14,15 +14,15 @@ module Crabstone
             layout(
                 :base, :uint8,
                 :index, :uint8,
-                :length, :uint64,
-                :disp, :int64
+                :disp, :int32,
+                :direct, :int
             )
         end
 
         class OperandValue < FFI::Union
             layout(
                 :reg, :uint,
-                :imm, :int64,
+                :imm, :int32,
                 :mem, MemoryOperand
             )
         end
@@ -35,7 +35,7 @@ module Crabstone
 
             def value
                 case self[:type]
-                when *[OP_REG, OP_ACREG]
+                when OP_REG
                     self[:value][:reg]
                 when OP_IMM
                     self[:value][:imm]
@@ -47,7 +47,7 @@ module Crabstone
             end
 
             def reg?
-                [OP_REG, OP_ACREG].include? self[:type]
+                self[:type] == OP_REG
             end
 
             def imm?
@@ -59,15 +59,14 @@ module Crabstone
             end
 
             def valid?
-                [OP_MEM, OP_IMM, OP_REG, OP_ACREG].include? self[:type]
+                [OP_MEM, OP_IMM, OP_REG].include? self[:type]
             end
         end
 
         class Instruction < FFI::Struct
             layout(
-                :cc, :uint,
                 :op_count, :uint8,
-                :operands, [Operand, 6],
+                :operands, [Operand, 8],
             )
 
             def operands

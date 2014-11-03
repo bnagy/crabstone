@@ -4,7 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: ./const_gen /Users/ben/src/capstone/bindings/python/capstone
+# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-03T10:58:08+12:00
 
 module Crabstone
   module Sparc
@@ -152,7 +153,8 @@ module Crabstone
     REG_O7 = 84
     REG_SP = 85
     REG_Y = 86
-    REG_MAX = 87
+    REG_XCC = 87
+    REG_ENDING = 88
     REG_O6 = REG_SP
     REG_I6 = REG_FP
     
@@ -435,19 +437,25 @@ module Crabstone
     INS_XNOR = 274
     INS_XORCC = 275
     INS_XOR = 276
-    INS_MAX = 277
+    INS_RET = 277
+    INS_RETL = 278
+    INS_ENDING = 279
     
     # Group of SPARC instructions
     
     GRP_INVALID = 0
-    GRP_HARDQUAD = 1
-    GRP_V9 = 2
-    GRP_VIS = 3
-    GRP_VIS2 = 4
-    GRP_VIS3 = 5
-    GRP_32BIT = 6
-    GRP_64BIT = 7
-    GRP_JUMP = 8
-    GRP_MAX = 9
+    
+    # Generic groups
+    GRP_JUMP = 1
+    
+    # Architecture-specific groups
+    GRP_HARDQUAD = 128
+    GRP_V9 = 129
+    GRP_VIS = 130
+    GRP_VIS2 = 131
+    GRP_VIS3 = 132
+    GRP_32BIT = 133
+    GRP_64BIT = 134
+    GRP_ENDING = 135
   end
 end

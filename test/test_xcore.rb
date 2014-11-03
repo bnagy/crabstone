@@ -8,57 +8,28 @@
 require 'crabstone'
 require 'stringio'
 
-module TestPPC
+module TestXCore
 
-  PPC_CODE = "\x43\x20\x0c\x07\x41\x56\xff\x17\x80\x20\x00\x00\x80\x3f\x00\x00\x10\x43\x23\x0e\xd0\x44\x00\x80\x4c\x43\x22\x02\x2d\x03\x00\x80\x7c\x43\x20\x14\x7c\x43\x20\x93\x4f\x20\x00\x21\x4c\xc8\x00\x21\x40\x82\x00\x14"
+  XCORE_CODE = "\xfe\x0f\xfe\x17\x13\x17\xc6\xfe\xec\x17\x97\xf8\xec\x4f\x1f\xfd\xec\x37\x07\xf2\x45\x5b\xf9\xfa\x02\x06\x1b\x10\x09\xfd\xec\xa7"
+
   include Crabstone
-  include Crabstone::PPC
+  include Crabstone::XCore
 
   @platforms = [
     Hash[
-      'arch' => ARCH_PPC,
+      'arch' => ARCH_XCORE,
       'mode' => MODE_BIG_ENDIAN,
-      'code' => PPC_CODE,
-      'comment' => "PPC-64"
-    ]
+      'code' => XCORE_CODE,
+      'comment' => "XCore"
+    ],
   ]
 
   def self.uint32 i
     Integer(i) & 0xffffffff
   end
 
-  def self.bc_name bc
-    case bc
-    when BC_INVALID
-      "invalid"
-    when BC_LT
-      "lt"
-    when BC_LE
-      "le"
-    when BC_EQ
-      "eq"
-    when BC_GE
-      "ge"
-    when BC_GT
-      "gt"
-    when BC_NE
-      "ne"
-    when BC_UN
-      "un"
-    when BC_NU
-      "nu"
-    when BC_SO
-      "so"
-    when BC_NS
-      "ns"
-    end
-  end
-
   def self.print_detail cs, insn, sio
     if insn.op_count > 0
-      if insn.writes_reg? :ra
-        print "[w:ra] "
-      end
       sio.puts "\top_count: #{insn.op_count}"
       insn.operands.each_with_index do |op,idx|
         case op[:type]
@@ -71,25 +42,17 @@ module TestPPC
           if op.value[:base].nonzero?
             sio.puts "\t\t\toperands[#{idx}].mem.base: REG = %s" % cs.reg_name(op.value[:base])
           end
+          if op.value[:index].nonzero?
+            sio.puts "\t\t\toperands[#{idx}].mem.index: REG = %s" % cs.reg_name(op.value[:index])
+          end
           if op.value[:disp].nonzero?
             sio.puts "\t\t\toperands[#{idx}].mem.disp: 0x%x" % (self.uint32(op.value[:disp]))
           end
-        when OP_CRX
-          sio.puts "\t\toperands[#{idx}].type: CRX\n"
-          sio.puts "\t\t\toperands[#{idx}].crx.scale: #{op.value[:scale]}"
-          sio.puts "\t\t\toperands[#{idx}].crx.reg: %s" % (cs.reg_name(op.value[:reg]))
-          sio.puts "\t\t\toperands[#{idx}].crx.cond: %s" % (self.bc_name(op.value[:cond]))
+          if op.value[:direct] != 1
+            sio.puts "\t\t\toperands[#{idx}].mem.direct: -1"
+          end
         end
       end
-    end
-    if insn.bc.nonzero?
-      sio.puts("\tBranch code: %u" % insn.bc)
-    end
-    if insn.bh.nonzero?
-      sio.puts("\tBranch hint: %u" % insn.bh)
-    end
-    if insn.update_cr0
-      sio.puts("\tUpdate-CR0: True")
     end
     sio.puts
   end
@@ -98,7 +61,7 @@ module TestPPC
 
   begin
     cs    = Disassembler.new(0,0)
-    print "PPC Test: Capstone v #{cs.version.join('.')} - "
+    print "XCore Test: Capstone v #{cs.version.join('.')} - "
   ensure
     cs.close
   end
@@ -120,9 +83,9 @@ module TestPPC
       cache = insn.address + insn.size
     }
 
+    cs.close
     ours.printf("0x%x:\n", cache)
     ours.puts
-    cs.close
   end
 
   ours.rewind

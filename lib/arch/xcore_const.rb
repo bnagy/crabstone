@@ -4,7 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: ./const_gen /Users/ben/src/capstone/bindings/python/capstone
+# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-03T10:58:08+12:00
 
 module Crabstone
   module XCore
@@ -46,7 +47,7 @@ module Crabstone
     REG_KEP = 23
     REG_KSP = 24
     REG_ID = 25
-    REG_MAX = 26
+    REG_ENDING = 26
     
     # XCore instruction
     
@@ -171,12 +172,14 @@ module Crabstone
     INS_WAITEU = 118
     INS_XOR = 119
     INS_ZEXT = 120
-    INS_MAX = 121
+    INS_ENDING = 121
     
     # Group of XCore instructions
     
     GRP_INVALID = 0
+    
+    # Generic groups
     GRP_JUMP = 1
-    GRP_MAX = 2
+    GRP_ENDING = 2
   end
 end

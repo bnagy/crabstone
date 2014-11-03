@@ -86,7 +86,7 @@ module TestSkipdata
       cs.skipdata p['mnemonic'], &(p['callback'])
     else
       # Even if callback is nil this turns on skipdata mode
-      cs.skipdata &(p['callback'])
+      cs.skipdata( &(p['callback']) )
     end
 
     cs.disasm(p['code'], 0x1000).each {|insn|
