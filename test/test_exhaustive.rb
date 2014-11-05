@@ -60,34 +60,4 @@ module TestExhaustive
 		fail "Missed some: #{check} vs #{@files.size}"
 	end
 	puts "Files: #{check}, Pass: #{pass}, Fail: #{fail}, Error: #{error}"
-	# 	exit
-	#   ours.puts "****************"
-	#   ours.puts "Platform: #{p['comment']}"
-	#   ours.puts "Code:#{p['code'].bytes.map {|b| "0x%.2x" % b}.join(' ')} "
-	#   ours.puts "Disasm:"
-
-	#   cs    = Disassembler.new(p['arch'], p['mode'])
-	#   cs.decomposer = true
-	#   cache = nil
-
-	#   cs.disasm(p['code'], 0x1000).each {|insn|
-	#     ours.puts "0x#{insn.address.to_s(16)}:\t#{insn.mnemonic}\t#{insn.op_str}"
-	#     self.print_detail(cs, insn, ours)
-	#     cache = insn.address + insn.size
-	#   }
-
-	#   cs.close
-	#   ours.printf("0x%x:\n", cache)
-	#   ours.puts
-	# end
-
-	# ours.rewind
-	# theirs = File.binread(__FILE__ + ".SPEC")
-	# if ours.read == theirs
-	#   puts "#{__FILE__}: PASS"
-	# else
-	#   ours.rewind
-	#   puts ours.read
-	#   puts "#{__FILE__}: FAIL"
-	# end
 end
