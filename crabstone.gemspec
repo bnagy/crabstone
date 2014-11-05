@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.test_files = Dir['test/*.rb']
   spec.files      = Dir['**/*'].delete_if{ |item| item.include?('git') }
 
-  spec.extra_rdoc_files = ['CHANGES', 'README.md', 'MANIFEST']
+  spec.extra_rdoc_files = ['CHANGES.md', 'README.md', 'MANIFEST']
 
   spec.add_runtime_dependency 'ffi' unless RUBY_PLATFORM =~/java/
   spec.add_development_dependency 'test-unit'
