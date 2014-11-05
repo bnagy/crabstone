@@ -32,6 +32,10 @@ module TestExhaustive
 		if syntax =~ /ATT/
 			cs.syntax = :att
 		end
+		if arch =~ /arm/i
+			cs.syntax = :no_regname
+		end
+
 		lines.each.with_index {|l, i|
 			bytes, text = l.chomp.split(' = ')
 			bytes = bytes.split(',').map {|b| b.to_i(16)}.pack('c*')
