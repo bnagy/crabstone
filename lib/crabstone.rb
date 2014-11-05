@@ -434,7 +434,7 @@ module Crabstone
         @count,
         insn_ptr
       )
-      Crabstone.raise_errno(errno) if insn_count.zero?
+      Crabstone.raise_errno(@engine.errno) if insn_count.zero?
       cs_resources = [insn_ptr.read_pointer, insn_count]
 
       begin
@@ -585,6 +585,11 @@ module Crabstone
     def disasm code, offset, count=0
       return [] if code.empty?
       Disassembly.new self, code, offset, count
+    end
+
+    def set_raw_option opt, val
+      res = Binding.cs_option csh, opt, val
+      Crabstone.raise_errno res if res.nonzero?
     end
 
   end
