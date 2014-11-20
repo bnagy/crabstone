@@ -1,45 +1,47 @@
+# Library by Nguyen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# (c) 2013 COSEINC. All Rights Reserved.
+
+# THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
+# Command: ./genreg /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-20T13:58:34+12:00
+
 module Crabstone
   module XCore
     REG_LOOKUP = {
-      "INVALID" => 0,
-      "R0"      => 1,
-      "R1"      => 2,
-      "R2"      => 3,
-      "R3"      => 4,
-      "R4"      => 5,
-      "R5"      => 6,
-      "R6"      => 7,
-      "R7"      => 8,
-      "R8"      => 9,
-      "R9"      => 10,
-      "R10"     => 11,
-      "R11"     => 12,
-      "R12"     => 13,
-      "R13"     => 14,
-      "R14"     => 15,
-      "R15"     => 16,
-      "CC"      => 17,
-      "F0"      => 18,
-      "F1"      => 19,
-      "F2"      => 20,
-      "F3"      => 21,
-      "F4"      => 22,
-      "F5"      => 23,
-      "F6"      => 24,
-      "F7"      => 25,
-      "F8"      => 26,
-      "F9"      => 27,
-      "F10"     => 28,
-      "F11"     => 29,
-      "F12"     => 30,
-      "F13"     => 31,
-      "F14"     => 32,
-      "F15"     => 33,
-      "R0L"     => 34,
-      "MAX"     => 35
+      'INVALID' => 0,
+      'CP' => 1,
+      'DP' => 2,
+      'LR' => 3,
+      'SP' => 4,
+      'R0' => 5,
+      'R1' => 6,
+      'R2' => 7,
+      'R3' => 8,
+      'R4' => 9,
+      'R5' => 10,
+      'R6' => 11,
+      'R7' => 12,
+      'R8' => 13,
+      'R9' => 14,
+      'R10' => 15,
+      'R11' => 16,
+      'PC' => 17,
+      'SCP' => 18,
+      'SSR' => 19,
+      'ET' => 20,
+      'ED' => 21,
+      'SED' => 22,
+      'KEP' => 23,
+      'KSP' => 24,
+      'ID' => 25
     }
 
     ID_LOOKUP = REG_LOOKUP.invert
+
+    # alias registers
+
     SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
 
     def self.register reg

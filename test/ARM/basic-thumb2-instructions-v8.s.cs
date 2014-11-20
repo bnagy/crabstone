@@ -1,1 +1,0 @@
-# CS_ARCH_ARM, CS_MODE_THUMB, None

@@ -52,3 +52,7 @@
 * PPC CRX operand
 * X86: added prefixed symbols
 * THIS IS A BREAKING CHANGE ( even from rc1 )
+
+## 3.0
+* See https://github.com/aquynh/capstone/wiki/ChangeLog-since-3.0-rc3
+* Shouldn't be breaking, most changes are internal.

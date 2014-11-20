@@ -29,7 +29,7 @@ module Crabstone
         class OperandValue < FFI::Union
             layout(
                 :reg, :uint,
-                :imm, :int32,
+                :imm, :int64,
                 :fp, :double,
                 :mem, MemoryOperand,
                 :pstate, :int,
@@ -53,21 +53,21 @@ module Crabstone
 
             def value
                 case self[:type]
-                when *[OP_REG, OP_REG_MRS, OP_REG_MSR]   # Register operand.
+                when *[OP_REG, OP_REG_MRS, OP_REG_MSR]  # Register operand.
                     self[:value][:reg]
-                when *[OP_IMM, OP_CIMM]   # Immediate operand.
+                when *[OP_IMM, OP_CIMM]                 # Immediate operand.
                     self[:value][:imm]
-                when OP_FP   # Floating-Point immediate operand.
+                when OP_FP                              # Floating-Point immediate operand.
                     self[:value][:fp]
-                when OP_MEM   # Memory operand
+                when OP_MEM                             # Memory operand
                     self[:value][:mem]
-                when OP_PSTATE # PState operand.
+                when OP_PSTATE                          # PState operand.
                     self[:value][:pstate]
-                when OP_SYS # SYS operand for IC/DC/AT/TLBI instructions.
+                when OP_SYS                             # SYS operand for IC/DC/AT/TLBI instructions.
                     self[:value][:sys]
-                when OP_PREFETCH # Prefetch operand (PRFM).
+                when OP_PREFETCH                        # Prefetch operand (PRFM).
                     self[:value][:prefetch]
-                when OP_BARRIER # Memory barrier operand (ISB/DMB/DSB instructions).
+                when OP_BARRIER                         # Memory barrier operand (ISB/DMB/DSB instructions).
                     self[:value][:barrier]
                 else
                     nil

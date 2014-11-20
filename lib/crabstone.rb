@@ -18,13 +18,13 @@ require_relative 'arch/ppc_registers'
 require_relative 'arch/sparc'
 require_relative 'arch/sparc_registers'
 require_relative 'arch/systemz'
-require_relative 'arch/systemz_registers'
+require_relative 'arch/sysz_registers'
 require_relative 'arch/xcore'
 require_relative 'arch/xcore_registers'
 
 module Crabstone
 
-  VERSION = '3.0rc3'
+  VERSION = '3.0'
 
   # API version
   BINDING_MAJ = 3
@@ -43,19 +43,23 @@ module Crabstone
   ARCH_ALL   = 0xFFFF
 
   # disasm mode
-  MODE_LITTLE_ENDIAN = 0          # little-endian mode (default mode)
-  MODE_ARM           = 0          # ARM mode
-  MODE_16            = (1 << 1)   # 16-bit mode (for X86, Mips)
-  MODE_32            = (1 << 2)   # 32-bit mode (for X86, Mips)
-  MODE_64            = (1 << 3)   # 64-bit mode (for X86, Mips)
-  MODE_THUMB         = (1 << 4)   # ARM's Thumb mode, including Thumb-2
-  MODE_MCLASS        = (1 << 5)   # ARM's Cortex-M series
-  MODE_MICRO         = (1 << 4)   # MicroMips mode (MIPS architecture)
-  MODE_MIPS3         = (1 << 5)   # Mips III ISA
-  MODE_MIPS32R6      = (1 << 6)   # Mips32r6 ISA
-  MODE_MIPSGP64      = (1 << 7)   # General Purpose Registers are 64-bit wide (MIPS arch)
-  MODE_V9            = (1 << 4)   # Nintendo-64 mode (MIPS architecture)
-  MODE_BIG_ENDIAN    = (1 << 31)  # big-endian mode
+  MODE_LITTLE_ENDIAN = 0       # little-endian mode (default mode)
+  MODE_ARM           = 0       # 32-bit ARM
+  MODE_16            = 1 << 1  # 16-bit mode (X86)
+  MODE_32            = 1 << 2  # 32-bit mode (X86)
+  MODE_64            = 1 << 3  # 64-bit mode (X86, PPC)
+  MODE_THUMB         = 1 << 4  # ARM's Thumb mode, including Thumb-2
+  MODE_MCLASS        = 1 << 5  # ARM's Cortex-M series
+  MODE_V8            = 1 << 6  # ARMv8 A32 encodings for ARM
+  MODE_MICRO         = 1 << 4  # MicroMips mode (MIPS)
+  MODE_MIPS3         = 1 << 5  # Mips III ISA
+  MODE_MIPS32R6      = 1 << 6  # Mips32r6 ISA
+  MODE_MIPSGP64      = 1 << 7  # General Purpose Registers are 64-bit wide (MIPS)
+  MODE_V9            = 1 << 4  # SparcV9 mode (Sparc)
+  MODE_BIG_ENDIAN    = 1 << 31 # big-endian mode
+  MODE_MIPS32        = MODE_32 # Mips32 ISA (Mips)
+  MODE_MIPS64        = MODE_64 # Mips64 ISA (Mips)
+
 
   # Capstone option type
   OPT_SYNTAX         = 1  # Intel X86 asm syntax (ARCH_X86 arch)

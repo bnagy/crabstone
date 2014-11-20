@@ -5,7 +5,7 @@ require 'date'
 # I hate these little scripts :(
 
 unless ARGV.length == 1
-	fail "Usage: #{$0} path/to/capstone/python/capstone"
+	fail "Usage: #{$0} path/to/capstone/bindings/python/capstone"
 end
 
 pyfiles = Dir.glob(File.join(ARGV[0], "*_const.py"))
