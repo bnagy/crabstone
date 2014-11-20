@@ -1,19 +1,12 @@
 crabstone
 ====
 
-NOTICE
-===
-
-Imagine one of those under construction gifs here.
-
-Upstream will be finalizing 3.0 mid-Nov 2014, and 2.2 is dead, so since this is a young project with few users I'm forcing an upgrade to 3.0 for both master and next.
-
 STATUS
 ===
 
 Hopefully working.
 
-Current Library binding: 3.0rc3
+Current Library binding: 3.0
 ----
 
 ( FROM THE CAPSTONE README )
@@ -52,7 +45,7 @@ Then (until we publish a gem) clone the repo, then do this:
 
 ```bash
 gem build crabstone.gemspec
-gem install crabstone-3.0rc3.gem
+gem install crabstone-3.0.gem
 rake test
 ```
 

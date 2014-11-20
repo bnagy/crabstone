@@ -32,7 +32,7 @@ module Crabstone
         :imm, :int32,
         :fp, :double,
         :mem, MemoryOperand,
-        :setend, :uint
+        :setend, :int
       )
     end
 
@@ -114,6 +114,7 @@ module Crabstone
         :cc, :uint,
         :update_flags, :bool,
         :writeback, :bool,
+        :mem_barrier, :int,
         :op_count, :uint8,
         :operands, [Operand, 36]
       )

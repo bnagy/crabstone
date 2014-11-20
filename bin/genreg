@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+
+require 'date'
+
+# I hate these little scripts :(
+
+unless ARGV.length == 1
+	fail "Usage: #{$0} path/to/capstone/bindings/python/capstone"
+end
+
+pyfiles = Dir.glob(File.join(ARGV[0], "*_const.py"))
+if pyfiles.empty?
+	fail "No *_const.py files found in #{ARGV[0]}"
+end
+
+pyfiles.each {|fn|
+
+	mod = File.basename(fn).split('_').first.upcase
+	python = File.read fn
+	rbfn = "#{mod.downcase}_registers.rb"
+
+	# Fixup the odd module names
+	mod = case mod
+	when 'SYSZ'
+		'SysZ'
+	when 'XCORE'
+		'XCore'
+	when 'SPARC'
+		'Sparc'
+	else
+		mod
+	end
+
+	puts "Writing #{mod}"
+
+	prefix = <<END
+# Library by Nguyen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# (c) 2013 COSEINC. All Rights Reserved.
+
+# THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
+# Command: #{$0} #{ARGV[0]}
+# #{DateTime.now}
+
+module Crabstone
+  module #{mod}
+    REG_LOOKUP = {
+END
+
+middle = <<END
+
+    ID_LOOKUP = REG_LOOKUP.invert
+
+    # alias registers
+END
+
+postfix = <<END
+    SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
+
+    def self.register reg
+      return reg if ID_LOOKUP[reg]
+      return SYM_LOOKUP[reg] if SYM_LOOKUP[reg]
+      if reg.respond_to? :upcase
+        return REG_LOOKUP[reg.upcase] || REG_LOOKUP['INVALID']
+      end
+      REG_LOOKUP['INVALID']
+    end
+
+  end
+end
+END
+
+	lines = python.lines[2..-1].map {|l| 
+		l.gsub(/#{mod.upcase}_/, '').sub(%q(//), ' # ')
+	}
+
+	File.open(rbfn, 'w+') {|fh|
+		fh.write prefix
+		registers = lines.map {|l|
+			next if l=~ /ENDING/
+			if l =~ /^REG_(.*) = (\d+)/
+				"      '#{$1}' => #{$2}"
+			end
+		}.compact
+		fh.write registers.join(",\n")
+		fh.write "\n    }\n"
+		fh.write middle
+		lines.each {|l|
+			next if l=~ /ENDING/
+			if l =~ /^REG_(.*) = REG_(.*)/
+				fh.write "    REG_LOOKUP['#{$1}'] = REG_LOOKUP['#{$2}']\n"
+			end
+		}
+		fh.puts
+		fh.write postfix
+	}
+
+}

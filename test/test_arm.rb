@@ -13,10 +13,12 @@ module TestARM
   include Crabstone
   include Crabstone::ARM
 
-ARM_CODE = "\xED\xFF\xFF\xEB\x04\xe0\x2d\xe5\x00\x00\x00\x00\xe0\x83\x22\xe5\xf1\x02\x03\x0e\x00\x00\xa0\xe3\x02\x30\xc1\xe7\x00\x00\x53\xe3\x00\x02\x01\xf1\x05\x40\xd0\xe8\xf4\x80\x00\x00"
-ARM_CODE2 = "\xd1\xe8\x00\xf0\xf0\x24\x04\x07\x1f\x3c\xf2\xc0\x00\x00\x4f\xf0\x00\x01\x46\x6c"
-THUMB_CODE = "\x70\x47\xeb\x46\x83\xb0\xc9\x68\x1f\xb1\x30\xbf\xaf\xf3\x20\x84"
-THUMB_CODE2 = "\x4f\xf0\x00\x01\xbd\xe8\x00\x88\xd1\xe8\x00\xf0\x18\xbf\xad\xbf\xf3\xff\x0b\x0c\x86\xf3\x00\x89\x80\xf3\x00\x8c\x4f\xfa\x99\xf6\xd0\xff\xa2\x01"
+  ARM_CODE     = "\xED\xFF\xFF\xEB\x04\xe0\x2d\xe5\x00\x00\x00\x00\xe0\x83\x22\xe5\xf1\x02\x03\x0e\x00\x00\xa0\xe3\x02\x30\xc1\xe7\x00\x00\x53\xe3\x00\x02\x01\xf1\x05\x40\xd0\xe8\xf4\x80\x00\x00"
+  ARM_CODE2    = "\xd1\xe8\x00\xf0\xf0\x24\x04\x07\x1f\x3c\xf2\xc0\x00\x00\x4f\xf0\x00\x01\x46\x6c"
+  THUMB_CODE   = "\x70\x47\xeb\x46\x83\xb0\xc9\x68\x1f\xb1\x30\xbf\xaf\xf3\x20\x84"
+  THUMB_CODE2  = "\x4f\xf0\x00\x01\xbd\xe8\x00\x88\xd1\xe8\x00\xf0\x18\xbf\xad\xbf\xf3\xff\x0b\x0c\x86\xf3\x00\x89\x80\xf3\x00\x8c\x4f\xfa\x99\xf6\xd0\xff\xa2\x01"
+  THUMB_MCLASS = "\xef\xf3\x02\x80"
+  ARMV8        = "\xe0\x3b\xb2\xee\x42\x00\x01\xe1\x51\xf0\x7f\xf5"
 
   @platforms = [
     Hash[
@@ -42,6 +44,20 @@ THUMB_CODE2 = "\x4f\xf0\x00\x01\xbd\xe8\x00\x88\xd1\xe8\x00\xf0\x18\xbf\xad\xbf\
       'mode' => MODE_THUMB,
       'code' => THUMB_CODE2,
       'comment' => "Thumb-2 & register named with numbers",
+      'syntax' => :no_regname
+    ],
+    Hash[
+      'arch' => ARCH_ARM,
+      'mode' => MODE_THUMB + MODE_MCLASS,
+      'code' => THUMB_MCLASS,
+      'comment' => "Thumb-MClass",
+      'syntax' => :no_regname
+    ],
+    Hash[
+      'arch' => ARCH_ARM,
+      'mode' => MODE_ARM + MODE_V8,
+      'code' => ARMV8,
+      'comment' => "Arm-V8",
       'syntax' => :no_regname
     ],
   ]
@@ -124,16 +140,17 @@ THUMB_CODE2 = "\x4f\xf0\x00\x01\xbd\xe8\x00\x88\xd1\xe8\x00\xf0\x18\xbf\xad\xbf\
       end
     end
 
+    if not [CC_AL, CC_INVALID].include? i.cc
+      sio.puts "\tCode condition: #{i.cc}"
+    end
     sio.puts "\tUpdate-flags: True" if i.update_flags
     sio.puts "\tWrite-back: True" if i.writeback
     sio.puts "\tCPSI-mode: #{i.cps_mode}" if i.cps_mode.nonzero?
     sio.puts "\tCPSI-flag: #{i.cps_flag}" if i.cps_flag.nonzero?
-    sio.puts "\tVector-data: #{i.vector_data}"if i.vector_data.nonzero?
+    sio.puts "\tVector-data: #{i.vector_data}" if i.vector_data.nonzero?
     sio.puts "\tVector-size: #{i.vector_size}" if i.vector_size.nonzero?
     sio.puts "\tUser-mode: True" if i.usermode
-    if not [CC_AL, CC_INVALID].include? i.cc
-      sio.puts "\tCode condition: #{i.cc}"
-    end
+    sio.puts "\tMemory-barrier: #{i.mem_barrier}" if i.mem_barrier.nonzero?
 
     sio.puts
 

@@ -4,8 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
-# 2014-11-03T10:58:08+12:00
+# Command: bin/genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-20T11:50:05+12:00
 
 module Crabstone
   module ARM
@@ -77,6 +77,27 @@ module Crabstone
     SYSREG_BASEPRI_MAX = 276
     SYSREG_FAULTMASK = 277
     SYSREG_CONTROL = 278
+    
+    # The memory barrier constants map directly to the 4-bit encoding of
+    # the option field for Memory Barrier operations.
+    
+    MB_INVALID = 0
+    MB_RESERVED_0 = 1
+    MB_OSHLD = 2
+    MB_OSHST = 3
+    MB_OSH = 4
+    MB_RESERVED_4 = 5
+    MB_NSHLD = 6
+    MB_NSHST = 7
+    MB_NSH = 8
+    MB_RESERVED_8 = 9
+    MB_ISHLD = 10
+    MB_ISHST = 11
+    MB_ISH = 12
+    MB_RESERVED_12 = 13
+    MB_LD = 14
+    MB_ST = 15
+    MB_SY = 16
     
     # Operand type for instruction's operands
     

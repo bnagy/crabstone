@@ -1,7 +1,16 @@
+# Library by Nguyen Anh Quynh
+# Original binding by Nguyen Anh Quynh and Tan Sheng Di
+# Additional binding work by Ben Nagy
+# (c) 2013 COSEINC. All Rights Reserved.
+
+# THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
+# Command: ./genreg /Users/ben/src/capstone/bindings/python/capstone/
+# 2014-11-20T13:58:34+12:00
+
 module Crabstone
   module X86
     REG_LOOKUP = {
-      "INVALID"=> 0,
+      'INVALID' => 0,
       'AH' => 1,
       'AL' => 2,
       'AX' => 3,
@@ -236,8 +245,11 @@ module Crabstone
       'R14W' => 232,
       'R15W' => 233
     }
-    
+
     ID_LOOKUP = REG_LOOKUP.invert
+
+    # alias registers
+
     SYM_LOOKUP = Hash[REG_LOOKUP.map {|k,v| [k.downcase.to_sym,v]}]
 
     def self.register reg
