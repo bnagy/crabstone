@@ -374,6 +374,10 @@ module Crabstone
       end
     end
 
+    def bytes
+      raw_insn[:bytes].first raw_insn[:size]
+    end
+
     # So an Instruction should respond to all the methods in Instruction, and
     # all the methods in the Arch specific Instruction class. The methods /
     # members that have special handling for detail mode or diet mode are
