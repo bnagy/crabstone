@@ -4,8 +4,8 @@
 # (c) 2013 COSEINC. All Rights Reserved.
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-# Command: bin/genconst /Users/ben/src/capstone/bindings/python/capstone/
-# 2014-11-20T11:50:05+12:00
+# Command: ./genconst /Users/ben/src/capstone/bindings/python/capstone/
+# 2015-05-02T13:24:01+12:00
 
 module Crabstone
   module ARM64

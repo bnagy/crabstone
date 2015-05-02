@@ -5,7 +5,7 @@
 
 # THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
 # Command: ./genreg /Users/ben/src/capstone/bindings/python/capstone/
-# 2014-11-20T13:58:34+12:00
+# 2015-05-02T13:24:08+12:00
 
 module Crabstone
   module XCore

@@ -24,7 +24,7 @@ require_relative 'arch/xcore_registers'
 
 module Crabstone
 
-  VERSION = '3.0'
+  VERSION = '3.0.3'
 
   # API version
   BINDING_MAJ = 3
