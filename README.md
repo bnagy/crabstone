@@ -6,7 +6,7 @@ STATUS
 
 Hopefully working.
 
-Current Library binding: 3.0
+Current Library binding: 3.0.3-rc1
 ----
 
 ( FROM THE CAPSTONE README )
@@ -45,7 +45,7 @@ Then (until we publish a gem) clone the repo, then do this:
 
 ```bash
 gem build crabstone.gemspec
-gem install crabstone-3.0.gem
+gem install crabstone-3.0.3.gem
 rake test
 ```
 
