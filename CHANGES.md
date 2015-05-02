@@ -56,3 +56,6 @@
 ## 3.0
 * See https://github.com/aquynh/capstone/wiki/ChangeLog-since-3.0-rc3
 * Shouldn't be breaking, most changes are internal.
+
+## 3.0.3-rc1
+* Internal binding updates, updated some test specs.

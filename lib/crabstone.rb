@@ -24,7 +24,7 @@ require_relative 'arch/xcore_registers'
 
 module Crabstone
 
-  VERSION = '3.0'
+  VERSION = '3.0.3'
 
   # API version
   BINDING_MAJ = 3
@@ -372,6 +372,10 @@ module Crabstone
       else
         self.operands.size
       end
+    end
+
+    def bytes
+      raw_insn[:bytes].first raw_insn[:size]
     end
 
     # So an Instruction should respond to all the methods in Instruction, and
