@@ -214,7 +214,9 @@ module Crabstone
       )
 
       def self.release(ptr)
-        Binding.free(ptr + Instruction.offset_of(:detail))
+        detail_ptr = ptr.+(Instruction.offset_of(:detail)).read_ptr
+        Binding.free(detail_ptr)
+        Binding.free(ptr)
       end
     end
 
