@@ -158,7 +158,7 @@ module Crabstone
   module Binding
 
     extend FFI::Library
-    ffi_lib 'capstone'
+    ffi_lib ['capstone', 'libcapstone.so.3']
 
     # This is because JRuby FFI on x64 Windows thinks size_t is 32 bit
     case FFI::Platform::ADDRESS_SIZE
@@ -202,7 +202,7 @@ module Crabstone
       )
     end
 
-    class Instruction < FFI::Struct
+    class Instruction < FFI::ManagedStruct
       layout(
         :id, :uint,
         :address, :ulong_long,
@@ -210,8 +210,14 @@ module Crabstone
         :bytes, [:uchar, 16],
         :mnemonic, [:char, 32],
         :op_str, [:char, 160],
-        :detail, Detail.ptr
+        :detail, Detail.by_ref
       )
+
+      def self.release(ptr)
+        detail_ptr = ptr.+(Instruction.offset_of(:detail)).read_ptr
+        Binding.free(detail_ptr)
+        Binding.free(ptr)
+      end
     end
 
     callback :skipdata_cb, [:pointer, :size_t, :size_t, :pointer], :size_t
@@ -231,7 +237,6 @@ module Crabstone
     )
     attach_function :cs_close, [:pointer], :cs_err
     attach_function :cs_errno, [:csh], :cs_err
-    attach_function :cs_free, [:pointer, :size_t], :void
     attach_function :cs_group_name, [:csh, :uint], :string
     attach_function :cs_insn_group, [:csh, Instruction, :uint], :bool
     attach_function :cs_insn_name, [:csh, :uint], :string
@@ -244,6 +249,9 @@ module Crabstone
     attach_function :cs_strerror, [:cs_err], :string
     attach_function :cs_support, [:cs_arch], :bool
     attach_function :cs_version, [:pointer, :pointer], :uint
+    attach_function :memcpy, [:pointer, :pointer, :size_t], :pointer
+    attach_function :malloc, [:size_t], :pointer
+    attach_function :free, [:pointer], :void
 
   end # Binding
 
@@ -422,47 +430,26 @@ module Crabstone
     include Enumerable
 
     attr_reader :engine
+    attr_reader :insns
 
-    def initialize engine, code, offset, count=0
+    def initialize(engine, code, offset, count = 0)
       @engine = engine
       @code = code
       @offset = offset
       @count = count
+
+      disasm!
     end
 
-    def each &blk
-
-      insn       = Binding::Instruction.new
-      insn_ptr   = FFI::MemoryPointer.new insn
-      insn_count = Binding.cs_disasm(
-        engine.csh,
-        @code,
-        @code.bytesize,
-        @offset,
-        @count,
-        insn_ptr
-      )
-      Crabstone.raise_errno(@engine.errno) if insn_count.zero?
-      cs_resources = [insn_ptr.read_pointer, insn_count]
-
-      begin
-        (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
-          cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
-          yield Instruction.new engine.csh, cs_insn, engine.arch
-        }
-      ensure
-        Binding.cs_free( *cs_resources )
-      end
-
+    def each(&block)
+      insns.each(&block)
     end
 
-    # Use of this method CAN BE LEAKY, please take care.
-    def insns
-      insn       = Binding::Instruction.new
-      insn_ptr   = FFI::MemoryPointer.new insn
-      insns = []
+    private
+    def disasm!
+      insn_ptr   = FFI::MemoryPointer.new :pointer
       insn_count = Binding.cs_disasm(
-        engine.csh,
+        @engine.csh,
         @code,
         @code.bytesize,
         @offset,
@@ -470,21 +457,18 @@ module Crabstone
         insn_ptr
       )
       Crabstone.raise_errno(errno) if insn_count.zero?
-      cs_resources = [insn_ptr.read_pointer, insn_count]
 
-      (0...insn_count * insn.size).step(insn.size).each {|insn_offset|
-        cs_insn   = Binding::Instruction.new( (insn_ptr.read_pointer)+insn_offset )
-        insns << Instruction.new( engine.csh, cs_insn, engine.arch )
-      }
-      # Once insns goes out of scope the underlying C memory will be freed.
-      # HOWEVER, if you're still keeping a ref to any of the Instructions that
-      # were inside that Array, they will still be valid, and will now behave
-      # in an undefined manner, which might include segfaults, missing data,
-      # or all kinds of other troubles.
-      ObjectSpace.define_finalizer(insns) {Binding.cs_free(*cs_resources)}
-      insns
+      @insns = (0...insn_count * Binding::Instruction.size).step(Binding::Instruction.size).map do |off|
+        cs_insn_ptr = Binding.malloc Binding::Instruction.size
+        cs_insn = Binding::Instruction.new cs_insn_ptr
+        Binding.memcpy(cs_insn_ptr, insn_ptr.read_pointer + off, Binding::Instruction.size)
+        Instruction.new engine.csh, cs_insn, engine.arch
+      end
+
+      @insns.freeze
+
+      Binding.free(insn_ptr.read_pointer)
     end
-
   end
 
   class Disassembler
