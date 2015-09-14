@@ -425,51 +425,6 @@ module Crabstone
 
   end
 
-  class Disassembly
-
-    include Enumerable
-
-    attr_reader :engine
-    attr_reader :insns
-
-    def initialize(engine, code, offset, count = 0)
-      @engine = engine
-      @code = code
-      @offset = offset
-      @count = count
-
-      disasm!
-    end
-
-    def each(&block)
-      insns.each(&block)
-    end
-
-    private
-    def disasm!
-      insn_ptr   = FFI::MemoryPointer.new :pointer
-      insn_count = Binding.cs_disasm(
-        @engine.csh,
-        @code,
-        @code.bytesize,
-        @offset,
-        @count,
-        insn_ptr
-      )
-      Crabstone.raise_errno(errno) if insn_count.zero?
-
-      @insns = (0...insn_count * Binding::Instruction.size).step(Binding::Instruction.size).map do |off|
-        cs_insn_ptr = Binding.malloc Binding::Instruction.size
-        cs_insn = Binding::Instruction.new cs_insn_ptr
-        Binding.memcpy(cs_insn_ptr, insn_ptr.read_pointer + off, Binding::Instruction.size)
-        Instruction.new engine.csh, cs_insn, engine.arch
-      end
-
-      @insns.freeze
-
-      Binding.free(insn_ptr.read_pointer)
-    end
-  end
 
   class Disassembler
 
@@ -574,9 +529,30 @@ module Crabstone
       name
     end
 
-    def disasm code, offset, count=0
+    def disasm code, offset, count = 0
       return [] if code.empty?
-      Disassembly.new self, code, offset, count
+
+      insn_ptr   = FFI::MemoryPointer.new :pointer
+      insn_count = Binding.cs_disasm(
+        @csh,
+        code,
+        code.bytesize,
+        offset,
+        count,
+        insn_ptr
+      )
+      Crabstone.raise_errno(errno) if insn_count.zero?
+
+      insns = (0...insn_count * Binding::Instruction.size).step(Binding::Instruction.size).map do |off|
+        cs_insn_ptr = Binding.malloc Binding::Instruction.size
+        cs_insn = Binding::Instruction.new cs_insn_ptr
+        Binding.memcpy(cs_insn_ptr, insn_ptr.read_pointer + off, Binding::Instruction.size)
+        Instruction.new @csh, cs_insn, @arch
+      end
+
+      Binding.free(insn_ptr.read_pointer)
+
+      insns
     end
 
     def set_raw_option opt, val
